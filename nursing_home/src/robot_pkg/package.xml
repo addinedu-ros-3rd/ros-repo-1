@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robot_pkg</name>
+  <version>0.0.0</version>
+  <description>package for each robot</description>
+
+  <maintainer email="wildcatts94@gmail.com">Taesang Cho</maintainer>
+  <maintainer email="rlathgml31@gmail.com">Sohee Kang</maintainer>
+  <maintainer email="haneol0415@gmail.com">Haneol Kang</maintainer>
+  <maintainer email="raemoon5349@gmail.com">Seoyoung Rae Moon</maintainer>
+  <maintainer email="yun5.dev@gmail.com">Yun Oh</maintainer>
+  <maintainer email="whghdrl9977@gmail.com">Hongki Cho</maintainer>
+
+  <license>MIT License</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
