@@ -1,7 +1,7 @@
 import rclpy
 
 from utils.custom_logger import Logger
-from module.task_planning import TaskPlanning
+from tools.task_planning import TaskPlanning
 
 from rclpy.node import Node
 from std_msgs.msg import String
