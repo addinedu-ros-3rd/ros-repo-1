@@ -5,9 +5,6 @@ from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.QtCore import *
 
-from utils.custom_logger import Logger
-
-log = Logger(__name__)
 
 from_class = uic.loadUiType("/home/yoh/git_ws/ros-repo-1/nursing_home/src/ui_pkg/ui_pkg/monitoring.ui")[0]
 
