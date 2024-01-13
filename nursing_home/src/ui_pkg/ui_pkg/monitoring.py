@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 import rclpy as rp
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from threading import Thread
 
 from interfaces_pkg.msg import TaskRequest, RobotStatusList
 from std_msgs.msg import String
@@ -15,9 +16,35 @@ from database.service_ui import DataManager
 from_class = uic.loadUiType("/home/yoh/git_ws/ros-repo-1/nursing_home/src/ui_pkg/ui_pkg/monitoring.ui")[0]
 
 
+class RobotStatusSubscriber(Node):
+    def __init__(self, ui):
+        
+        super().__init__('robot_status_subscriber')
+        
+        self.ui = ui
+        self.subscription = self.create_subscription(
+            RobotStatusList,
+            'send_robot_status',
+            self.callback,
+            10
+        )
 
+    def callback(self, msg):
+        print('robot_callback started')
+        
+        self.ui.robot_table.setItem(0,0, QTableWidgetItem(msg.robot1.status))
+        self.ui.robot_table.setItem(0,1, QTableWidgetItem(msg.robot1.task))
+        self.ui.robot_table.setItem(0,2, QTableWidgetItem(msg.robot1.goal))
+        
+        self.ui.robot_table.setItem(1,0, QTableWidgetItem(msg.robot2.status))
+        self.ui.robot_table.setItem(1,1, QTableWidgetItem(msg.robot2.task))
+        self.ui.robot_table.setItem(1,2, QTableWidgetItem(msg.robot2.goal))
+        
+        self.ui.robot_table.setItem(2,0, QTableWidgetItem(msg.robot3.status))
+        self.ui.robot_table.setItem(2,1, QTableWidgetItem(msg.robot3.task))
+        self.ui.robot_table.setItem(2,2, QTableWidgetItem(msg.robot3.goal))
 
-class WindowClass(QMainWindow, from_class) :
+class WindowClass(QMainWindow, from_class):
 
     def __init__(self):
         super().__init__()
@@ -35,7 +62,7 @@ class WindowClass(QMainWindow, from_class) :
 
         # 토픽 발행하기
         self.count = 0
-        rp.init()
+        
         self.node = rp.create_node('task_node')
         
         # DB상 로봇 상태 토픽으로 수신
@@ -92,12 +119,6 @@ class WindowClass(QMainWindow, from_class) :
             self.queue_callback,
             10  # QoS 프로파일
         )
-        self.robot_status_sub = self.node.create_subscription(
-            RobotStatusList,
-            'send_robot_status',
-            self.robot_callback,
-            10
-        )
 
 
     def queue_callback(self, msg):
@@ -115,14 +136,6 @@ class WindowClass(QMainWindow, from_class) :
         self.tableWidget.setItem(row_position, 0, QTableWidgetItem(received_message))
         self.tableWidget.setItem(row_position, 1, QTableWidgetItem(received_message))
         
-        
-    def robot_callback(self, msg):
-        print('robot_callback started')
-        
-        self.robot_table.setItem(0,0, QTableWidgetItem(msg.robot1.status))
-        self.robot_table.setItem(1,0, QTableWidgetItem(msg.robot2.status))
-        self.robot_table.setItem(2,0, QTableWidgetItem(msg.robot3.status))
-
 
     def add(self):
         task_type_id = self.task_combo.currentData()
@@ -198,9 +211,19 @@ class WindowClass(QMainWindow, from_class) :
         
         
 def main():
+    rp.init()
+    executor = MultiThreadedExecutor()
+    
     app = QApplication(sys.argv)
     myWindows = WindowClass()
     myWindows.show()
+    
+    robot_status_subscriber = RobotStatusSubscriber(myWindows)
+    executor.add_node(robot_status_subscriber)
+    
+    thread = Thread(target=executor.spin)
+    thread.start()
+    
     sys.exit(app.exec_())
 
 
