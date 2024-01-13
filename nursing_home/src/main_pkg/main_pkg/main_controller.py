@@ -12,6 +12,8 @@ from interfaces_pkg.msg import Task, TaskRequest, RobotStatusList
 log = Logger(__name__)
 task_planner = TaskPlanning()
 
+TIMER_PERIOD = 0.5
+
 class TaskSubscriber(Node):
 
     def __init__(self):
@@ -30,7 +32,7 @@ class TaskSubscriber(Node):
         
         # (2-1) 대기중인 로봇 확인, DB에서 로봇/업무 상태 업데이트
         # 리턴값: 수행할 로봇, 로봇에 배정된 업무, 아직 배정되지 않은 업무목록
-        task_planner.robot, task_planner.item, task_planner.q = task_planner.main(msg)
+        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main(msg)
         log.info((task_planner.robot, task_planner.item, task_planner.q))
         
         
@@ -39,10 +41,10 @@ class SendRobotStatusPublisher(Node):
     def __init__(self):
         super().__init__('send_robot_status_publisher')
         self.publisher = self.create_publisher(RobotStatusList, '/send_robot_status', 10)
+        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
+    def timer_callback(self):
         msg = RobotStatusList()
-        
-        log.info(task_planner.robot_status_list)
         
         msg.robot1.id = task_planner.robot_status_list[0][0]
         msg.robot1.status = task_planner.robot_status_list[0][1]
