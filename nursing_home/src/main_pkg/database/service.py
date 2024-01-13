@@ -1,7 +1,7 @@
-from rclpy.logging import get_logger as log
+from utils.custom_logger import Logger
 from database.dao import DB
 
-
+log = Logger(__name__)
 db = DB()
 
 
@@ -9,8 +9,8 @@ class DataManager:
     
     def insert_task(self, task):
         try:
-            query = "INSERT INTO task (task_type_id, waypoints) values (%s, %s)"
-            db.execute(query, (task.task_type_id, str(task.waypoints)))
+            query = "INSERT INTO task (task_type_id, waypoints, place) values (%s, %s, %s)"
+            db.execute(query, (task.task_type_id, str(task.waypoints), task.place))
             
         except Exception as e:
             log.error(f"insert_task : {e}")
@@ -78,3 +78,29 @@ class DataManager:
             
         except Exception as e:
             log.error(f"update_robot_waiting : {e}")
+            
+            
+    def select_all_robot_status(self):
+        try:
+            query = """
+                    select ttt1.id, ttt1.status, IFNULL(tt.meaning, ''), IFNULL(ttt1.place, '')
+                    from (select tt1.id, tt1.status, t.task_type_id, t.place
+                        from (SELECT t1.id, t1.pos, t1.battery, t1.status, rwm.meaning
+                            FROM (SELECT r.id, r.pos, r.battery, rs.meaning as status, r.robot_work_mode_id
+                                    FROM robot r
+                                    join robot_status rs
+                                    on r.robot_status_id = rs.id) t1
+                            join robot_work_mode rwm
+                            on t1.robot_work_mode_id = rwm.id) tt1
+                        left join task t
+                        on tt1.id = t.robot_id) ttt1
+                    left join task_type tt
+                    on ttt1.task_type_id = tt.id
+                    """;
+            db.execute(query)
+            robot_status_list = db.fetchAll()
+            
+            return robot_status_list
+            
+        except Exception as e:
+            log.error(f"select_all_robot_status : {e}")

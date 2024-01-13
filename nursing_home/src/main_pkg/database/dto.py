@@ -1,8 +1,9 @@
 class Task:
-    def __init__(self, id=None, task_type_id=None, waypoints=None):
+    def __init__(self, id=None, task_type_id=None, waypoints=None, place=None):
         self._id = id
         self._task_type_id = task_type_id
         self._waypoints = waypoints
+        self._place = place
     
     @property
     def id(self):
@@ -15,3 +16,7 @@ class Task:
     @property
     def waypoints(self):
         return self._waypoints
+    
+    @property
+    def place(self):
+        return self._place
