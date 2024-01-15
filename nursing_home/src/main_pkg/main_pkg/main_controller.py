@@ -152,7 +152,7 @@ class TaskPublisher1(Node):
         if (task_planner.item != None) and (task_planner.robot == 1):
             log.info(task_planner.item.waypoints)
             
-            msg = Task()
+            msg = TaskRequest()
             msg.header.frame_id = "map"
             msg.header.stamp = self.get_clock().now().to_msg()
             
