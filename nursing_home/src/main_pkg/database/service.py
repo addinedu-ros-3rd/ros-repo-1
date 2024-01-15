@@ -18,9 +18,14 @@ class DataManager:
             
     def select_task_not_started(self):
         try:
-            query = "SELECT id, task_type_id, waypoints \
-                     FROM task \
-                     WHERE robot_id IS NULL"
+            query = """
+                    SELECT t.id, t.robot_id, t.waypoints, tt.meaning, t.place
+                    FROM task t
+                    JOIN task_type tt
+                    ON t.task_type_id = tt.id
+                    WHERE t.robot_id IS NULL
+                    order by t.id
+                    """
             task_list = db.executeAndFetchAll(query)
             
             return task_list

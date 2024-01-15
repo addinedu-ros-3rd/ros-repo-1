@@ -28,13 +28,21 @@ class TaskPlanning():
 
         # DB task 테이블에 현재 들어있는 값 가져오기
         task_list = dm.select_task_not_started()
-
-        # 큐에 추가
-        for task in task_list:
-            self.q.put(Task(id = task[0], task_type_id = task[1], waypoints = task[2]))
+        
+        # 현재 큐에 있는 태스크
+        id_list = []
+        for item in self.q.queue:
+            id_list.append(item.id)
             
-        log.info('-----------add_task----------------')
-        log.info(self.q.qsize())
+        # for id in id_list:
+        #     log.info(id)
+
+        # (현재 큐에 없는 것만) 큐에 추가
+        for task in task_list:
+            if task[0] not in id_list:
+                self.q.put(Task(id = task[0], task_type_id = task[1], waypoints = task[2], task_type = task[3], place = task[4]))
+            
+        return self.q
         
         
     def task_start(self, robot, item):
@@ -73,10 +81,11 @@ class TaskPlanning():
                 
                 if self.robot != 0:
                     self.task_start(self.robot, self.item)
+                    
+                    return self.robot, self.item, self.q, self.robot_status_list
             
             except Exception as e:
                 log.error(f"task_planning main: {e}")
-                
                 
         return self.robot, self.item, self.q, self.robot_status_list
 

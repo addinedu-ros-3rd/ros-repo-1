@@ -6,7 +6,7 @@ from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
-from interfaces_pkg.msg import Task, TaskRequest, RobotStatusList
+from interfaces_pkg.msg import *
 
 
 log = Logger(__name__)
@@ -27,16 +27,12 @@ class TaskSubscriber(Node):
             self.callback,
             10)
 
+
     def callback(self, msg):
-        log.info('------TaskSubscriber callback-------')
-        
-        # (2-1) 대기중인 로봇 확인, DB에서 로봇/업무 상태 업데이트
-        # 리턴값: 수행할 로봇, 로봇에 배정된 업무, 아직 배정되지 않은 업무목록
         task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main(msg)
-        log.info((task_planner.robot, task_planner.item, task_planner.q))
         
         
-class SendRobotStatusPublisher(Node):
+class RobotStatusPublisher(Node):
     
     def __init__(self):
         log.info("SendRobotStatusPublisher started.")
@@ -44,6 +40,7 @@ class SendRobotStatusPublisher(Node):
         super().__init__('send_robot_status_publisher')
         self.publisher = self.create_publisher(RobotStatusList, '/robot_status', 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        
         
     def timer_callback(self):
         msg = RobotStatusList()
@@ -68,11 +65,12 @@ class SendRobotStatusPublisher(Node):
         self.publisher.publish(msg)
         
         
-class SendTaskPublisher(Node):
+class TaskPublisher(Node):
     def __init__(self, robot, item):
         super().__init__('send_task_publisher')
         self.publisher = self.create_publisher(Task, '/task_' + str(robot), 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        
         
     def timer_callback(self):
         msg = Task()
@@ -96,15 +94,33 @@ class SendTaskPublisher(Node):
         self.publisher.publish(msg)
         
         
-class SendQueuePublisher(Node):
+class TaskQueuePublisher(Node):
     def __init__(self):
         super().__init__('send_queue_publisher')
-        self.publisher = self.create_publisher(String, '/task_queue', 10)
+        self.publisher = self.create_publisher(TaskQueue, '/task_queue', 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
     def timer_callback(self):
-        msg = String()
-        msg.data = str(task_planner.q.queue)
+        msg = TaskQueue()
+        
+        task_planner.q = task_planner.add_task()
+        
+        # log.info(len(task_planner.q.queue))
+        
+        if len(task_planner.q.queue) > 0:
+            
+            for i in range(len(task_planner.q.queue)):
+                item = TaskQueueItem()
+                item.task_type = task_planner.q.queue[i].task_type
+                item.place = task_planner.q.queue[i].place
+                
+                # log.info((item.task_type, item.place))
+                
+                msg.data.append(item)
+        
+        # for v in msg.data:
+        #     log.info(v)
+            
         self.publisher.publish(msg)
         
         
@@ -147,12 +163,12 @@ def main():
     executor = MultiThreadedExecutor()
     
     task_subscriber = TaskSubscriber()
-    send_q_publisher = SendQueuePublisher()
-    send_robot_status_publisher = SendRobotStatusPublisher()
+    task_queue_publisher = TaskQueuePublisher()
+    robot_status_publisher = RobotStatusPublisher()
     
     executor.add_node(task_subscriber)
-    executor.add_node(send_q_publisher)
-    executor.add_node(send_robot_status_publisher)
+    executor.add_node(task_queue_publisher)
+    executor.add_node(robot_status_publisher)
     
     executor.spin()
     

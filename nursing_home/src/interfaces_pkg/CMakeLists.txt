@@ -19,6 +19,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AstarMsg.msg"
   "msg/RobotStatus.msg"
   "msg/RobotStatusList.msg"
+  "msg/TaskQueue.msg"
+  "msg/TaskQueueItem.msg"
   "msg/TaskRequest.msg"
   DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )

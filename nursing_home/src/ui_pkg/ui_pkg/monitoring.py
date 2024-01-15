@@ -8,7 +8,7 @@ from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from threading import Thread
 
-from interfaces_pkg.msg import TaskRequest, RobotStatusList
+from interfaces_pkg.msg import *
 from std_msgs.msg import String
 from database.service_ui import DataManager
 
@@ -26,29 +26,57 @@ class RobotStatusSubscriber(Node):
             RobotStatusList,
             'robot_status',
             self.callback,
-            10
+            1
         )
 
     def callback(self, msg):
         
-        self.ui.robot_table.setItem(0,0, QTableWidgetItem(msg.robot1.status))
-        self.ui.robot_table.setItem(0,1, QTableWidgetItem(msg.robot1.task))
-        self.ui.robot_table.setItem(0,2, QTableWidgetItem(msg.robot1.goal))
+        self.ui.robot_table.setItem(0, 0, QTableWidgetItem(msg.robot1.status))
+        self.ui.robot_table.setItem(0, 1, QTableWidgetItem(msg.robot1.task))
+        self.ui.robot_table.setItem(0, 2, QTableWidgetItem(msg.robot1.goal))
         
-        self.ui.robot_table.setItem(1,0, QTableWidgetItem(msg.robot2.status))
-        self.ui.robot_table.setItem(1,1, QTableWidgetItem(msg.robot2.task))
-        self.ui.robot_table.setItem(1,2, QTableWidgetItem(msg.robot2.goal))
+        self.ui.robot_table.setItem(1, 0, QTableWidgetItem(msg.robot2.status))
+        self.ui.robot_table.setItem(1, 1, QTableWidgetItem(msg.robot2.task))
+        self.ui.robot_table.setItem(1, 2, QTableWidgetItem(msg.robot2.goal))
         
-        self.ui.robot_table.setItem(2,0, QTableWidgetItem(msg.robot3.status))
-        self.ui.robot_table.setItem(2,1, QTableWidgetItem(msg.robot3.task))
-        self.ui.robot_table.setItem(2,2, QTableWidgetItem(msg.robot3.goal))
+        self.ui.robot_table.setItem(2, 0, QTableWidgetItem(msg.robot3.status))
+        self.ui.robot_table.setItem(2, 1, QTableWidgetItem(msg.robot3.task))
+        self.ui.robot_table.setItem(2, 2, QTableWidgetItem(msg.robot3.goal))
+        
+        
+class TaskQueueSubscriber(Node):
+    def __init__(self, ui):
+        super().__init__('task_queue_subscriber')
+        
+        self.ui = ui
+        self.subscription = self.create_subscription(
+            TaskQueue,
+            'task_queue',
+            self.callback,
+            1
+        )
+        
+        
+    def callback(self, msg):
+        # print(len(msg.data))
+        
+        if len(msg.data) > 0:
+            for i in range(len(msg.data)):
+                # print(msg.data[i].task_type, msg.data[i].place)
+                
+                if self.ui.task_queue.rowCount() < len(msg.data):
+                    self.ui.task_queue.insertRow(i)
+                    
+                    self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
+                    self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
+
 
 class WindowClass(QMainWindow, from_class):
 
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.task_queue.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # 시간 표시하기     
         timer = QTimer(self)
@@ -61,11 +89,7 @@ class WindowClass(QMainWindow, from_class):
 
         # 토픽 발행하기
         self.count = 0
-        
         self.node = rp.create_node('task_node')
-        
-        # DB상 로봇 상태 토픽으로 수신
-        self.sub()
 
         self.serve_btn.clicked.connect(self.pub)
         self.serve_stop.clicked.connect(self.stop)
@@ -89,7 +113,7 @@ class WindowClass(QMainWindow, from_class):
 
         self.zeroto255 = [self.time_label, self.title_label, self.robot_table, self.queue_label,
                           self.serve_mode, self.serve_btn, self.serve_stop, self.normal_mode, self.clear_btn,
-                          self.task_combo, self.location_combo, self.call_btn, self.tableWidget]
+                          self.task_combo, self.location_combo, self.call_btn, self.task_queue]
         
         self.labels = [self.map_group, self.cam_group, self.request_group]
 
@@ -109,32 +133,7 @@ class WindowClass(QMainWindow, from_class):
         place_list = self.dm.select_all_place()
         for item in place_list:
             self.location_combo.addItem(item[0], (item[1], item[2], item[3]))  # 이름과 (x, y, z) 좌표를 가져옴(이름만 표시) 
-    
-    
-    def sub(self):
-        self.queue_sub = self.node.create_subscription(
-            String,
-            'task_queue',  # 토픽 이름을 여기에 입력
-            self.queue_callback,
-            10  # QoS 프로파일
-        )
-
-
-    def queue_callback(self, msg):
-        received_message = msg.data
-        print(f'Received: {received_message}')
-
-        # 메세지를 받으면 GUI 업데이트
-        self.label.setText(f'Received message: {received_message}')
-        
-        # 클릭과 동시에 row를 추가하지 않고, main에서 들어온 값을 표시할 것
-        row_position = self.tableWidget.rowCount()
-
-        self.tableWidget.insertRow(row_position)
-
-        self.tableWidget.setItem(row_position, 0, QTableWidgetItem(received_message))
-        self.tableWidget.setItem(row_position, 1, QTableWidgetItem(received_message))
-        
+            
 
     def add(self):
         task_type_id = self.task_combo.currentData()
@@ -219,6 +218,9 @@ def main():
     
     robot_status_subscriber = RobotStatusSubscriber(myWindows)
     executor.add_node(robot_status_subscriber)
+    
+    task_queue_subscriber = TaskQueueSubscriber(myWindows)
+    executor.add_node(task_queue_subscriber)
     
     thread = Thread(target=executor.spin)
     thread.start()
