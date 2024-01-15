@@ -158,7 +158,8 @@ class TaskPublisher1(Node):
     def task_timer_callback(self):
         task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
         
-        if (task_planner.item != None) and (task_planner.robot == 1):
+        if task_planner.item != None:
+        # if (task_planner.item != None) and (task_planner.robot == 1):
             log.info(task_planner.item.waypoints)
             
             msg = TaskRequest()

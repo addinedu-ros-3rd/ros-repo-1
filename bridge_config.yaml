@@ -25,3 +25,8 @@ topics:
     from_domain: 91
     to_domain: 99
     remap: task
+  astar_paths_1:
+    type: interfaces_pkg/msg/AstarMsg
+    from_domain: 91
+    to_domain: 99
+    remap: astar_paths

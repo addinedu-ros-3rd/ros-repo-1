@@ -27,14 +27,12 @@ class GoPoseNode(Node):
     def __init__(self):
         super().__init__(node_name='go_pose_navigator')
 
-
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
         self.status = None
         self.amcl = PoseWithCovarianceStamped()
         self.navigator = BasicNavigator()
-
 
         self.done_publisher = self.create_publisher(String, '/done_task', 10)        
         self.astar_path_sub = self.create_subscription(AstarMsg,
