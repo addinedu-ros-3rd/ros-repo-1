@@ -1,13 +1,12 @@
 import configparser
 import os
+from ament_index_python.packages import get_package_share_directory
 
 def get_config():
-    basedir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(basedir)
+    config_parser = configparser.ConfigParser()
+    config_file = os.path.join(get_package_share_directory('main_pkg'), 'utils', 'config.ini')
+    config_parser.read(config_file)
     
-    configParser = configparser.ConfigParser()
-    
-    configParser.read('/home/yoh/git_ws/ros-repo-1/nursing_home/src/main_pkg/utils/config.ini')
-    config = configParser['dev']
+    config = config_parser['dev']
     
     return config
