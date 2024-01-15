@@ -32,14 +32,12 @@ class TaskRequestSubscriber(Node):
         self.subscription = self.create_subscription(
             TaskRequest,
             "task_request",
-            self.callback,
+            self.task_request_callback,
             10)
 
 
-    def callback(self, msg):
-        # log.info(msg)
+    def task_request_callback(self, msg):
         task_planner.add_task(msg)
-        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.add_task(msg)
 
 
 class AMCLSubscriber(Node):
@@ -111,10 +109,10 @@ class RobotStatusPublisher(Node):
         
         super().__init__("send_robot_status_publisher")
         self.publisher = self.create_publisher(RobotStatusList, "/robot_status", 10)
-        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        self.timer = self.create_timer(TIMER_PERIOD, self.robot_status_timer_callback)
         
         
-    def timer_callback(self):
+    def robot_status_timer_callback(self):
         msg = RobotStatusList()
         
         task_planner.robot_status_list = task_planner.show_robot_status()
@@ -143,18 +141,16 @@ class TaskPublisher1(Node):
         
         super().__init__("task_publisher_1")
         self.publisher = self.create_publisher(TaskRequest, "/task_1", 10)
-        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        self.timer = self.create_timer(TIMER_PERIOD, self.task_timer_callback)
         
         
-    def timer_callback(self):
+    def task_timer_callback(self):
         task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
         
         if (task_planner.item != None) and (task_planner.robot == 1):
             log.info(task_planner.item.waypoints)
             
             msg = TaskRequest()
-            msg.header.frame_id = "map"
-            msg.header.stamp = self.get_clock().now().to_msg()
             
             x = task_planner.item.waypoints.split(",")[0].replace("[", "")
             log.info(x)
@@ -178,9 +174,9 @@ class TaskQueuePublisher(Node):
     def __init__(self):
         super().__init__('task_queue_publisher')
         self.publisher = self.create_publisher(TaskQueue, '/task_queue' , 10)
-        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        self.timer = self.create_timer(TIMER_PERIOD, self.task_queue_timer_callback)
         
-    def timer_callback(self):
+    def task_queue_timer_callback(self):
         msg = TaskQueue()
         
         task_planner.q = task_planner.add_task()
