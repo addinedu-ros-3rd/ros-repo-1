@@ -21,8 +21,7 @@ class DataManager:
             query = "SELECT id, task_type_id, waypoints \
                      FROM task \
                      WHERE robot_id IS NULL"
-            db.execute(query)
-            task_list = db.fetchAll()
+            task_list = db.executeAndFetchAll(query)
             
             return task_list
             
@@ -33,8 +32,7 @@ class DataManager:
     def select_waiting_robot(self):
         try:
             query = "SELECT id FROM robot WHERE robot_status_id = 2"
-            db.execute(query)
-            waiting_robot = db.fetchOne()
+            waiting_robot = db.executeAndFetchOne(query)
             
             return waiting_robot
         
@@ -97,8 +95,7 @@ class DataManager:
                     left join task_type tt
                     on ttt1.task_type_id = tt.id
                     """;
-            db.execute(query)
-            robot_status_list = db.fetchAll()
+            robot_status_list = db.executeAndFetchAll(query)
             
             return robot_status_list
             

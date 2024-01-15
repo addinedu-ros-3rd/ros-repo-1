@@ -24,13 +24,12 @@ class RobotStatusSubscriber(Node):
         self.ui = ui
         self.subscription = self.create_subscription(
             RobotStatusList,
-            'send_robot_status',
+            'robot_status',
             self.callback,
             10
         )
 
     def callback(self, msg):
-        print('robot_callback started')
         
         self.ui.robot_table.setItem(0,0, QTableWidgetItem(msg.robot1.status))
         self.ui.robot_table.setItem(0,1, QTableWidgetItem(msg.robot1.task))
@@ -115,7 +114,7 @@ class WindowClass(QMainWindow, from_class):
     def sub(self):
         self.queue_sub = self.node.create_subscription(
             String,
-            'send_queue',  # 토픽 이름을 여기에 입력
+            'task_queue',  # 토픽 이름을 여기에 입력
             self.queue_callback,
             10  # QoS 프로파일
         )

@@ -39,12 +39,16 @@ class TaskSubscriber(Node):
 class SendRobotStatusPublisher(Node):
     
     def __init__(self):
+        log.info("SendRobotStatusPublisher started.")
+        
         super().__init__('send_robot_status_publisher')
-        self.publisher = self.create_publisher(RobotStatusList, '/send_robot_status', 10)
+        self.publisher = self.create_publisher(RobotStatusList, '/robot_status', 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
     def timer_callback(self):
         msg = RobotStatusList()
+        
+        task_planner.robot_status_list = task_planner.show_robot_status()
         
         msg.robot1.id = task_planner.robot_status_list[0][0]
         msg.robot1.status = task_planner.robot_status_list[0][1]
@@ -66,23 +70,23 @@ class SendRobotStatusPublisher(Node):
         
 class SendTaskPublisher(Node):
     def __init__(self, robot, item):
-        log.info("SendTaskPublisher started.")
-        
         super().__init__('send_task_publisher')
-        self.publisher = self.create_publisher(Task, '/send_task_' + str(robot), 10)
+        self.publisher = self.create_publisher(Task, '/task_' + str(robot), 10)
+        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
+    def timer_callback(self):
         msg = Task()
         msg.header.frame_id = "map"
         msg.header.stamp = self.get_clock().now().to_msg()
         
         # 하나의 지점에 하나의 태스크가 있다고 가정(to do: 리스트 전송)
-        x = item.waypoints.split("],")[0].split(",")[0].replace("[[", "").replace(" [", "")
+        x = task_planner.item.waypoints.split("],")[0].split(",")[0].replace("[[", "").replace(" [", "")
         log.info(x)
         
-        y = item.waypoints.split("],")[0].split(",")[1].replace(" ", "")
+        y = task_planner.item.waypoints.split("],")[0].split(",")[1].replace(" ", "")
         log.info(y)
         
-        z = item.waypoints.split("],")[0].split(",")[2].replace(" ", "").replace("]]", "")
+        z = task_planner.item.waypoints.split("],")[0].split(",")[2].replace(" ", "").replace("]]", "")
         log.info(z)
         
         msg.position.x = float(x)
@@ -93,21 +97,19 @@ class SendTaskPublisher(Node):
         
         
 class SendQueuePublisher(Node):
-    def __init__(self, q):
-        log.info("SendQueuePublisher started.")
-        
+    def __init__(self):
         super().__init__('send_queue_publisher')
-        self.publisher = self.create_publisher(String, '/send_queue', 10)
+        self.publisher = self.create_publisher(String, '/task_queue', 10)
+        self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
+        
+    def timer_callback(self):
         msg = String()
-        msg.data = str(q.queue)
+        msg.data = str(task_planner.q.queue)
         self.publisher.publish(msg)
         
         
 class DoneTaskSubscriber1(Node):
-
     def __init__(self):
-        log.info("DoneTaskSubscriber1 started.")
-        
         super().__init__('done_task_subscriber_1')
         self.subscription = self.create_subscription(
             String,
@@ -124,10 +126,7 @@ class DoneTaskSubscriber1(Node):
             
             
 class DoneTaskSubscriber2(Node):
-
     def __init__(self):
-        log.info("DoneTaskSubscriber2 started.")
-        
         super().__init__('done_task_subscriber_2')
         self.subscription = self.create_subscription(
             String,
@@ -147,9 +146,15 @@ def main():
     rclpy.init()
     executor = MultiThreadedExecutor()
     
-    # (1) GUI에서 요청업무 수신 -- callback으로 Task Planning과 Send Queue Publisher 실행
     task_subscriber = TaskSubscriber()
+    send_q_publisher = SendQueuePublisher()
+    send_robot_status_publisher = SendRobotStatusPublisher()
+    
     executor.add_node(task_subscriber)
+    executor.add_node(send_q_publisher)
+    executor.add_node(send_robot_status_publisher)
+    
+    executor.spin()
     
     # (2-2) UI에서 보낸 값이 없어도 DB에 있는 값을 찾아서 실행
     # DB에 값이 없다면 None값을 리턴받게 됨
@@ -157,15 +162,6 @@ def main():
     
     log.info('----------------main-------------')
     log.info((task_planner.robot, task_planner.item, task_planner.q))
-        
-    # (3-1) 큐가 있다면, GUI에 토픽으로 업무 큐 전송
-    if task_planner.q != None:
-        send_q_publisher = SendQueuePublisher(task_planner.q)
-        executor.add_node(send_q_publisher)
-        
-    # (3-2) 현재 로봇의 상태를 토픽으로 전송
-    send_robot_status_publisher = SendRobotStatusPublisher()
-    executor.add_node(send_robot_status_publisher)
 
     # (3) Path Planning
         
@@ -176,8 +172,6 @@ def main():
     # (6) 로봇에서 완료업무 수신(토픽 remap -> task_id)
     # done_task_1 = DoneTaskSubscriber1()
     # executor.add_node(done_task_1)
-    
-    executor.spin()
     
 
 if __name__ == '__main__':

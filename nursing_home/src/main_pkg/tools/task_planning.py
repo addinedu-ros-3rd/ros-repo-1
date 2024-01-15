@@ -41,8 +41,6 @@ class TaskPlanning():
         dm.update_task_robot_id(robot, item)
         dm.update_robot_working(robot)
         self.q.get()
-        
-        self.robot_status_list = dm.select_all_robot_status()
     
     
     def get_done(self, robot):
@@ -53,6 +51,12 @@ class TaskPlanning():
         
         # 업무중이던 로봇을 대기 상태로 변경
         dm.update_robot_waiting(robot)
+        
+        
+    def show_robot_status(self):
+        self.robot_status_list = dm.select_all_robot_status()
+        
+        return self.robot_status_list
 
 
     def main(self, req=None):
@@ -67,9 +71,7 @@ class TaskPlanning():
             try:
                 self.robot = dm.select_waiting_robot()
                 
-                log.info(("now waiting robot: ", self.robot))
-                
-                if self.robot != None:
+                if self.robot != 0:
                     self.task_start(self.robot, self.item)
             
             except Exception as e:

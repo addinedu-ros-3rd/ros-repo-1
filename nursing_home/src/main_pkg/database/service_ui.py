@@ -10,8 +10,7 @@ class DataManager:
     def select_all_task_type(self):
         try:
             query = "SELECT meaning, id FROM task_type order by id"
-            db.execute(query)
-            task_type_list = db.fetchAll()
+            task_type_list = db.executeAndFetchAll(query)
             
             log.info(task_type_list)
             
@@ -24,8 +23,7 @@ class DataManager:
     def select_all_place(self):
         try:
             query = "SELECT ko_name, x, y, z FROM place order by id"
-            db.execute(query)
-            place_list = db.fetchAll()
+            place_list = db.executeAndFetchAll(query)
             
             return place_list
         

@@ -3,6 +3,8 @@ import mysql.connector
 from utils.custom_logger import Logger
 from utils.config_util import get_config
 
+from mysql.connector import pooling
+
 config = get_config()
 
 log = Logger(__name__)
@@ -10,85 +12,76 @@ log = Logger(__name__)
 class DB():
     
     def __init__(self):
-        try:
-            host = config['host']
-            port = config['port']
-            user = config['user']
-            password = config['password']
-            database = config['database']
-            
-            self.conn = mysql.connector.connect(host = host, 
-                                                port = port, 
-                                                user = user, 
-                                                password = password, 
-                                                database = database)
-            self.cursor = self.conn.cursor(buffered=True)
-   
-        except Exception as e:
-            log.error(f" DB __init__ : {e}")
-            self.conn = None
-
-
-    def disconnect(self):
-        self.cursor.close()
-        self.conn.close()
-            
-            
-    def checkIfConnected(self):
-        if not self.conn:
-            raise Exception("Not connected to the database. Call connect() method first.")
-            
-
+        db_config = {
+            'host': config['host'],
+            'user': config['user'],
+            'password': config['password'],
+            'database': config['database'],
+        }
+        
+        self.connection_pool = pooling.MySQLConnectionPool(pool_name="my_pool", pool_size=5, **db_config)
+        
+        
     def execute(self, query, params=None):
+        connection = self.connection_pool.get_connection()
+
         try:
-            self.checkIfConnected()
-            self.cursor.execute(query, params)
-            self.conn.commit()
+            if connection.is_connected():
+                cursor = connection.cursor(buffered=True)
+                cursor.execute(query, params)
+                connection.commit()
 
-        except Exception as e:
-            log.error(f" DB execute : {e}")
-
-
-    def fetchOne(self):
-        try:
-            self.checkIfConnected()
-            return self.cursor.fetchone()[0]
-
-        except Exception as e:
-            log.error(f" DB fetchOne : {e}")
-
-
-    def fetchAll(self):
-        try:
-            self.checkIfConnected()
-            return self.cursor.fetchall()
-
-        except Exception as e:
-            log.error(f" DB fetchAll : {e}")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
             
-    
-    def callProc(self, proc_name, params):
-        try:
-            self.checkIfConnected()
-            log.info((proc_name, params))
-            self.cursor.callproc(proc_name, params)
-            self.conn.commit()
-
-        except Exception as e:
-            log.error(f" DB callProc : {e}")
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
             
-            
-    def callProcReturn(self, proc_name, params):
+
+    def executeAndFetchAll(self, query, params=None):
+        connection = self.connection_pool.get_connection()
+
         try:
-            self.checkIfConnected()
-            log.info((proc_name, params))
-            self.cursor.callproc(proc_name, params)
-            self.conn.commit()
+            if connection.is_connected():
+                cursor = connection.cursor(buffered=True)
+                cursor.execute(query, params)
+                connection.commit()
+                
+                result = cursor.fetchall()
 
-            for result in self.cursor.stored_results():
-                    result = result.fetchone()[0]
+                return result
 
-        except Exception as e:
-            log.error(f" DB callProc : {e}")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
 
-        return result
+
+    def executeAndFetchOne(self, query, params=None):
+        connection = self.connection_pool.get_connection()
+
+        try:
+            if connection.is_connected():
+                cursor = connection.cursor(buffered=True)
+                cursor.execute(query, params)
+                connection.commit()
+                
+                result = cursor.fetchone()
+                
+                if result:
+                    return result[0]
+                else:
+                    return 0
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
