@@ -21,15 +21,6 @@ class TaskSubscriber(Node):
         
     def listener_callback(self, msg):
         print(msg)
-
-
-class DoneTaskPublisher(Node):
-    def __init__(self):
-        super().__init__('done_task_publisher')
-        self.publisher = self.create_publisher(String, '/done_task', 10)
-        msg = String()
-        msg.data = "OK"
-        self.publisher.publish(msg)
         
 
 class GoPoseNode(Node):
@@ -120,9 +111,6 @@ def main():
     # navigation 수행 노드
     go_pose_node = GoPoseNode()
     executor.add_node(go_pose_node)
-
-    # done_task_publisher = DoneTaskPublisher()
-    # executor.add_node(done_task_publisher)
     
     executor.spin()
     
