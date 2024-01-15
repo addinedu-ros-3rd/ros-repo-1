@@ -1,9 +1,7 @@
-import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
-import rclpy as rp
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from threading import Thread
@@ -12,8 +10,14 @@ from interfaces_pkg.msg import *
 from std_msgs.msg import String
 from database.service_ui import DataManager
 
+from ament_index_python.packages import get_package_share_directory
 
-from_class = uic.loadUiType("/home/yoh/git_ws/ros-repo-1/nursing_home/src/ui_pkg/ui_pkg/monitoring.ui")[0]
+import sys
+import rclpy as rp
+import os
+
+ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
+from_class = uic.loadUiType(ui_file)[0]
 
 
 class RobotStatusSubscriber(Node):

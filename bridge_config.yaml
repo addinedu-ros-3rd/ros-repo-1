@@ -21,7 +21,7 @@ topics:
     to_domain: 99
     remap: goal_pose
   task_1:
-    type: interfaces_pkg/msg/Task
+    type: interfaces_pkg/msg/TaskRequest
     from_domain: 91
     to_domain: 99
     remap: task

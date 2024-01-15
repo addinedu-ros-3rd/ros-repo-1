@@ -52,14 +52,14 @@ class AStarPlanner:
 
     def load_map(self):
         print("Loading map start!")
-        map_yaml_file = os.path.join(get_package_share_directory('nursing_home_robot'), 'map', 'map_09_modified.yaml')
+        map_yaml_file = os.path.join(get_package_share_directory('main_pkg'), 'map', 'home.yaml')
         map_yaml_data = yaml.full_load(open(map_yaml_file))
 
         self.map_resolution = map_yaml_data['resolution']    # m / pixel
         self.map_origin = map_yaml_data['origin']    # list
         
 
-        map_pgm_file = os.path.join(get_package_share_directory('nursing_home_robot'), 'map', map_yaml_data['image'])
+        map_pgm_file = os.path.join(get_package_share_directory('main_pkg'), 'map', map_yaml_data['image'])
 
         with open(map_pgm_file, 'rb') as pgmf:
             pgm_data = pgmf.readlines()
