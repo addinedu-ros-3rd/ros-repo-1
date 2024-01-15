@@ -1,16 +1,24 @@
 from utils.custom_logger import Logger
 from tools.task_planning import TaskPlanning
+from tools.astar_planning import AStarPlanner
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
+from geometry_msgs.msg import PoseWithCovarianceStamped, Point
 from interfaces_pkg.msg import *
 
 
 log = Logger(__name__)
 task_planner = TaskPlanning()
+path_planner = AStarPlanner(resolution=1, rr=0.4, padding=5)
+
+amcl_1 = PoseWithCovarianceStamped()
+amcl_2 = PoseWithCovarianceStamped()
+amcl_3 = PoseWithCovarianceStamped()
 
 TIMER_PERIOD = 0.5
 
@@ -31,6 +39,69 @@ class TaskSubscriber(Node):
     def callback(self, msg):
         # log.info(msg)
         task_planner.add_task(msg)
+        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main(msg)
+
+
+class AMCLSubscriber(Node):
+    def __init__(self):
+        super().__init__('amcl_subscriber')
+
+        amcl_pose_qos = QoSProfile(
+          durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+          reliability=QoSReliabilityPolicy.RELIABLE,
+          history=QoSHistoryPolicy.KEEP_LAST,
+          depth=1)
+        
+        self.amcl_subscriber_1 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_1', self.amcl_callback_1, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+        self.amcl_subscriber_2 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_2', self.amcl_callback_2, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+        self.amcl_subscriber_3 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_3', self.amcl_callback_3, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+
+
+    def amcl_callback_1(self, msg):
+        amcl_1 = msg
+
+    def amcl_callback_2(self, msg):
+        amcl_2 = msg
+
+    def amcl_callback_3(self, msg):
+        amcl_3 = msg
+
+
+class AStarPublisher(Node):
+    def __init__(self, robot) :
+        super().__init__('astar_publisher')
+
+        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths', 10)
+        self.goal_subscriber = self.create_subscription(Task, '/task_' + str(robot), self.task_callback, 10)
+
+        self.astar_planner = AStarPlanner(resolution=0.7, rr=0.3, padding=5)
+        self.now_x = 0
+        self.now_y = 0
+
+    def task_callback(self, msg):
+        # _, _, ori_z, ori_w = quaternion_from_euler()
+
+        pose_stamp = PoseWithCovarianceStamped()
+        pose_stamp.header.frame_id = 'map'
+
+        rx, ry, tpx, tpy, tvec_x, tvec_y = self.astar_planner.planning(self.now_x, self.now_y, msg.position.x, msg.position.y)
+
+        astar_paths = []
+        astar_paths_msg = AstarMsg()
+        astar_paths_msg.length = len(tpx)
+
+        for i in range(len(tpx)):
+            tmp = Point()
+            tmp.x = tpx[i]
+            tmp.y = tpy[i]
+            # astar_paths.vec_x = tvec_x[1:]
+            # astar_paths.vec_y = tvec_y[1:]
+
+            astar_paths.append(tmp)
+
+        astar_paths_msg.positions = astar_paths
+
+        self.astar_publisher.publish(astar_paths_msg)
         
         
 class RobotStatusPublisher(Node):
@@ -176,12 +247,16 @@ def main():
     task_queue_publisher = TaskQueuePublisher()  # UI로 로봇 할당 안된 업무 목록 보내기
     robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
     task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
+    amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
+    astar_publisher_1 = AStarPublisher(robot='1')  # 로봇 이동 경로 publish
     done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
     executor.add_node(task_subscriber)
     executor.add_node(task_queue_publisher)
     executor.add_node(robot_status_publisher)
     executor.add_node(task_publisher)
+    executor.add_node(amcl_subscriber)
+    executor.add_node(astar_publisher_1)
     executor.add_node(done_task_1)
     
     executor.spin()
