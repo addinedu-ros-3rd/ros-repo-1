@@ -29,6 +29,7 @@ class RobotStatusSubscriber(Node):
             1
         )
 
+
     def callback(self, msg):
         
         self.ui.robot_table.setItem(0, 0, QTableWidgetItem(msg.robot1.status))
@@ -58,7 +59,8 @@ class TaskQueueSubscriber(Node):
         
         
     def callback(self, msg):
-        # print(len(msg.data))
+        if len(msg.data) != self.ui.task_queue.rowCount():
+            self.ui.task_queue.setRowCount(0)
         
         if len(msg.data) > 0:
             for i in range(len(msg.data)):
@@ -69,8 +71,7 @@ class TaskQueueSubscriber(Node):
                     
                     self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
                     self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
-        else:
-            self.ui.task_queue.setRowCount(0)
+            
 
 
 class WindowClass(QMainWindow, from_class):

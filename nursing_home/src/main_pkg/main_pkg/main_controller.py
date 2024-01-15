@@ -29,7 +29,8 @@ class TaskSubscriber(Node):
 
 
     def callback(self, msg):
-        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main(msg)
+        # log.info(msg)
+        task_planner.add_task(msg)
         
         
 class RobotStatusPublisher(Node):
@@ -65,33 +66,42 @@ class RobotStatusPublisher(Node):
         self.publisher.publish(msg)
         
         
-class TaskPublisher(Node):
-    def __init__(self, robot, item):
+class TaskPublisher1(Node):
+    def __init__(self):
+        log.info("TaskPublisher started.")
+        
         super().__init__('send_task_publisher')
-        self.publisher = self.create_publisher(Task, '/task_' + str(robot), 10)
+        self.publisher = self.create_publisher(Task, '/task_1', 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
         
     def timer_callback(self):
-        msg = Task()
-        msg.header.frame_id = "map"
-        msg.header.stamp = self.get_clock().now().to_msg()
+        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
         
-        # 하나의 지점에 하나의 태스크가 있다고 가정(to do: 리스트 전송)
-        x = task_planner.item.waypoints.split("],")[0].split(",")[0].replace("[[", "").replace(" [", "")
-        log.info(x)
-        
-        y = task_planner.item.waypoints.split("],")[0].split(",")[1].replace(" ", "")
-        log.info(y)
-        
-        z = task_planner.item.waypoints.split("],")[0].split(",")[2].replace(" ", "").replace("]]", "")
-        log.info(z)
-        
-        msg.position.x = float(x)
-        msg.position.y = float(y)
-        msg.position.z = float(z)
-        
-        self.publisher.publish(msg)
+        # if (task_planner.item != None) and (task_planner.robot == 1):
+        if task_planner.item != None:
+            log.info(task_planner.item.waypoints)
+            
+            msg = Task()
+            msg.header.frame_id = "map"
+            msg.header.stamp = self.get_clock().now().to_msg()
+            
+            x = task_planner.item.waypoints.split(",")[0].replace("[", "")
+            log.info(x)
+            
+            y = task_planner.item.waypoints.split(",")[1]
+            log.info(y)
+            
+            z = task_planner.item.waypoints.split(",")[2].replace("]", "")
+            log.info(z)
+            
+            msg.position.x = float(x)
+            msg.position.y = float(y)
+            msg.position.z = float(z)
+            
+            # path planning을 여기에서 해야 할 것 같다
+            
+            self.publisher.publish(msg)
         
         
 class TaskQueuePublisher(Node):
@@ -162,32 +172,19 @@ def main():
     rclpy.init()
     executor = MultiThreadedExecutor()
     
-    task_subscriber = TaskSubscriber()
-    task_queue_publisher = TaskQueuePublisher()
-    robot_status_publisher = RobotStatusPublisher()
+    task_subscriber = TaskSubscriber()  # UI에서 요청 받음
+    task_queue_publisher = TaskQueuePublisher()  # UI로 로봇 할당 안된 업무 목록 보내기
+    robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
+    task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
+    done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
     executor.add_node(task_subscriber)
     executor.add_node(task_queue_publisher)
     executor.add_node(robot_status_publisher)
+    executor.add_node(task_publisher)
+    executor.add_node(done_task_1)
     
     executor.spin()
-    
-    # (2-2) UI에서 보낸 값이 없어도 DB에 있는 값을 찾아서 실행
-    # DB에 값이 없다면 None값을 리턴받게 됨
-    task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main()
-    
-    log.info('----------------main-------------')
-    log.info((task_planner.robot, task_planner.item, task_planner.q))
-
-    # (3) Path Planning
-        
-    # (4) 로봇에게 토픽으로 좌표들 전송 -- Path Planning 커스텀 안 쓸 경우 nav2가 robot_pkg에서 돌아가게 함
-    # task_publisher = SendTaskPublisher(task_planner.robot, task_planner.item)
-    # executor.add_node(task_publisher)
-        
-    # (6) 로봇에서 완료업무 수신(토픽 remap -> task_id)
-    # done_task_1 = DoneTaskSubscriber1()
-    # executor.add_node(done_task_1)
     
 
 if __name__ == '__main__':

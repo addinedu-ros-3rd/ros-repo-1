@@ -20,6 +20,9 @@ class TaskPlanning():
     
     def add_task(self, req=None):
         
+        # todo: ui 실행 후 태스크 큐 하나 추가 후 다음부터 req를 못 받음
+        # log.info(req)
+        
         if req != None:
             t1 = Task(task_type_id = req.task_type_id,
                       waypoints = [req.position.x, req.position.y, req.position.z],
@@ -67,10 +70,7 @@ class TaskPlanning():
         return self.robot_status_list
 
 
-    def main(self, req=None):
-        
-        self.add_task(req)
-
+    def give_robot_task(self):
         # 로봇에 업무 추가 + 큐에서 삭제
         while not self.q.empty():
             d = self.q.queue
@@ -92,4 +92,4 @@ class TaskPlanning():
 
 if __name__ == "__main__":
     tp = TaskPlanning()
-    tp.main()
+    tp.give_robot_task()
