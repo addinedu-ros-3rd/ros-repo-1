@@ -9,8 +9,8 @@ class DataManager:
     
     def insert_task(self, task):
         try:
-            query = "INSERT INTO task (task_type_id, waypoints, place) values (%s, %s, %s)"
-            db.execute(query, (task.task_type_id, str(task.waypoints), task.place))
+            query = "INSERT INTO task (task_type_id, goal_point, place) values (%s, %s, %s)"
+            db.execute(query, (task.task_type_id, str(task.goal_point), task.place))
             
         except Exception as e:
             log.error(f"insert_task : {e}")
@@ -19,7 +19,7 @@ class DataManager:
     def select_task_not_started(self):
         try:
             query = """
-                    SELECT t.id, t.robot_id, t.waypoints, tt.meaning, t.place
+                    SELECT t.id, t.robot_id, t.goal_point, tt.meaning, t.place
                     FROM task t
                     JOIN task_type tt
                     ON t.task_type_id = tt.id
@@ -43,6 +43,17 @@ class DataManager:
         
         except Exception as e:
             log.error(f"select_not_working_robot : {e}")
+            
+            
+    def select_task(self, robot):
+        try:
+            query = "SELECT id FROM task WHERE robot_id = (%s)"
+            done_task = db.executeAndFetchOne(query, (robot,))
+            
+            return done_task
+        
+        except Exception as e:
+            log.error(f"select_task : {e}")
             
             
     def update_task_robot_id(self, robot, task):

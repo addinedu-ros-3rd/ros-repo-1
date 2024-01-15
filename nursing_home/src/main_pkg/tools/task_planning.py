@@ -25,7 +25,7 @@ class TaskPlanning():
         
         if req != None:
             t1 = Task(task_type_id = req.task_type_id,
-                      waypoints = [req.position.x, req.position.y, req.position.z],
+                      goal_point = [req.position.x, req.position.y, req.position.z],
                       place = req.place)
             dm.insert_task(t1)
 
@@ -43,7 +43,7 @@ class TaskPlanning():
         # (현재 큐에 없는 것만) 큐에 추가
         for task in task_list:
             if task[0] not in id_list:
-                self.q.put(Task(id = task[0], task_type_id = task[1], waypoints = task[2], task_type = task[3], place = task[4]))
+                self.q.put(Task(id = task[0], task_type_id = task[1], goal_point = task[2], task_type = task[3], place = task[4]))
             
         return self.q
         
@@ -56,9 +56,9 @@ class TaskPlanning():
     
     def get_done(self, robot):
         # 로봇이 배정되어서 시작 후 종료되지 않은 업무 조회
-        item = dm.select_task(robot)
+        done_task = dm.select_task(robot)
         # 업무 완료 처리
-        dm.update_task_done(item)
+        dm.update_task_done(done_task)
         
         # 업무중이던 로봇을 대기 상태로 변경
         dm.update_robot_waiting(robot)
