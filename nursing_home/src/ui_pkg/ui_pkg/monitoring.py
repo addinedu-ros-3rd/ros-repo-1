@@ -69,6 +69,8 @@ class TaskQueueSubscriber(Node):
                     
                     self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
                     self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
+        else:
+            self.ui.task_queue.setRowCount(0)
 
 
 class WindowClass(QMainWindow, from_class):

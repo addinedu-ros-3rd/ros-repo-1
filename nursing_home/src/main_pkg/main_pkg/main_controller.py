@@ -118,8 +118,8 @@ class TaskQueuePublisher(Node):
                 
                 msg.data.append(item)
         
-        # for v in msg.data:
-        #     log.info(v)
+        for v in msg.data:
+            log.info(v)
             
         self.publisher.publish(msg)
         

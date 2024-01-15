@@ -34,8 +34,8 @@ class TaskPlanning():
         for item in self.q.queue:
             id_list.append(item.id)
             
-        # for id in id_list:
-        #     log.info(id)
+        for id in id_list:
+            log.info(id)
 
         # (현재 큐에 없는 것만) 큐에 추가
         for task in task_list:
