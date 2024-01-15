@@ -39,7 +39,7 @@ class TaskRequestSubscriber(Node):
     def callback(self, msg):
         # log.info(msg)
         task_planner.add_task(msg)
-        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.main(msg)
+        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.add_task(msg)
 
 
 class AMCLSubscriber(Node):
@@ -71,8 +71,8 @@ class AStarPublisher(Node):
     def __init__(self, robot) :
         super().__init__('astar_publisher')
 
-        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths', 10)
-        self.goal_subscriber = self.create_subscription(Task, '/task_' + str(robot), self.task_callback, 10)
+        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_' + str(robot), 10)
+        self.goal_subscriber = self.create_subscription(TaskRequest, '/task_' + str(robot), self.task_callback, 10)
 
         self.astar_planner = AStarPlanner(resolution=0.7, rr=0.3, padding=5)
         self.now_x = 0
@@ -142,7 +142,7 @@ class TaskPublisher1(Node):
         log.info("TaskPublisher started.")
         
         super().__init__("task_publisher_1")
-        self.publisher = self.create_publisher(Task, "/task_1", 10)
+        self.publisher = self.create_publisher(TaskRequest, "/task_1", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
         
@@ -177,7 +177,7 @@ class TaskPublisher1(Node):
 class TaskQueuePublisher(Node):
     def __init__(self):
         super().__init__('task_queue_publisher')
-        self.publisher = self.create_publisher(TaskQueue, '/task_queue', 10)
+        self.publisher = self.create_publisher(TaskQueue, '/task_queue' , 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
     def timer_callback(self):

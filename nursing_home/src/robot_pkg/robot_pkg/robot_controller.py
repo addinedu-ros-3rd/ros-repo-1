@@ -1,9 +1,13 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from nav2_simple_commander.robot_navigator import BasicNavigator
+from rclpy.duration import Duration
+from nav2_simple_commander.robot_navigator import TaskResult
 
-from interfaces_pkg.msg import Task
+from interfaces_pkg.msg import Task, AstarMsg
 from std_msgs.msg import String
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
 
 class SendTaskSubscriber(Node):
@@ -12,7 +16,7 @@ class SendTaskSubscriber(Node):
         
         self.subscription = self.create_subscription(
             Task,
-            'send_task',
+            'task',
             self.listener_callback,
             10)
         
