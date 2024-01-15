@@ -1,11 +1,10 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
-from nav2_simple_commander.robot_navigator import BasicNavigator
+from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from rclpy.duration import Duration
-from nav2_simple_commander.robot_navigator import TaskResult
 
-from interfaces_pkg.msg import Task, AstarMsg
+from interfaces_pkg.msg import TaskRequest, AstarMsg
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
@@ -13,37 +12,37 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 class SendTaskSubscriber(Node):
     def __init__(self):
         super().__init__('send_task_subscriber')
-        
-        self.subscription = self.create_subscription(
-            Task,
-            'task',
-            self.listener_callback,
-            10)
+
+        self.task_subscription = self.create_subscription(TaskRequest, 'task', self.listener_callback, 10)
         
     def listener_callback(self, msg):
         print("listening..." + msg)
         # todo: basic navigator로 현재 로봇 실행
 
 
-class DoneTaskPublisher(Node):
-    def __init__(self):
-        super().__init__('done_task_publisher')
-        self.publisher = self.create_publisher(String, '/done_task', 10)
-        msg = String()
-        msg.data = "OK"
-        self.publisher.publish(msg)
+# class DoneTaskPublisher(Node):
+#     def __init__(self):
+#         super().__init__('done_task_publisher')
+#         self.publisher = self.create_publisher(String, '/done_task', 10)
+#         msg = String()
+#         msg.data = "OK"
+#         self.publisher.publish(msg)
         
 
 class GoPoseNode(Node):
     def __init__(self):
         super().__init__(node_name='go_pose_navigator')
+
+
         self.goal_handle = None
         self.result_future = None
         self.feedback = None
         self.status = None
         self.amcl = PoseWithCovarianceStamped()
         self.navigator = BasicNavigator()
-        
+
+
+        self.done_publisher = self.create_publisher(String, '/done_task', 10)        
         self.astar_path_sub = self.create_subscription(AstarMsg,
                                                        'astar_paths',
                                                        self.astarCallback,
@@ -51,7 +50,6 @@ class GoPoseNode(Node):
 
     def astarCallback(self, astar_paths):
         self.navigator.waitUntilNav2Active()
-
         
         paths = []
         for i in range(astar_paths.length):
@@ -64,7 +62,6 @@ class GoPoseNode(Node):
             # goal_pose.pose.orientation.z = 0.10424110491274381
             # goal_pose.pose.orientation.w = 0.9945520559762422
             paths.append(goal_pose)
-
 
 
         self.navigator.goThroughPoses(paths)
@@ -98,6 +95,9 @@ class GoPoseNode(Node):
         # Do something depending on the return code
         result = self.navigator.getResult()
         if result == TaskResult.SUCCEEDED:
+            msg = String()
+            msg.data = "OK"
+            self.done_publisher.publish(msg)
             print('Goal succeeded!')
         elif result == TaskResult.CANCELED:
             print('Goal was canceled!')
@@ -105,6 +105,7 @@ class GoPoseNode(Node):
             print('Goal failed!')
         else:
             print('Goal has an invalid return status!')
+            
 
 def main():
     rclpy.init()
@@ -117,8 +118,8 @@ def main():
     go_pose_node = GoPoseNode()
     executor.add_node(go_pose_node)
 
-    done_task_publisher = DoneTaskPublisher()
-    executor.add_node(done_task_publisher)
+    # done_task_publisher = DoneTaskPublisher()
+    # executor.add_node(done_task_publisher)
     
     executor.spin()
     
