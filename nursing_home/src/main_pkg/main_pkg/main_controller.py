@@ -22,16 +22,16 @@ amcl_3 = PoseWithCovarianceStamped()
 
 TIMER_PERIOD = 0.5
 
-class TaskSubscriber(Node):
+class TaskRequestSubscriber(Node):
 
     def __init__(self):
-        log.info("TaskSubscriber started.")
+        log.info("TaskRequestSubscriber started.")
         self.received_task = None
         
-        super().__init__('task_subscriber')
+        super().__init__("task_request_subscriber")
         self.subscription = self.create_subscription(
             TaskRequest,
-            'task_request',
+            "task_request",
             self.callback,
             10)
 
@@ -109,8 +109,8 @@ class RobotStatusPublisher(Node):
     def __init__(self):
         log.info("SendRobotStatusPublisher started.")
         
-        super().__init__('send_robot_status_publisher')
-        self.publisher = self.create_publisher(RobotStatusList, '/robot_status', 10)
+        super().__init__("send_robot_status_publisher")
+        self.publisher = self.create_publisher(RobotStatusList, "/robot_status", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
         
@@ -141,16 +141,15 @@ class TaskPublisher1(Node):
     def __init__(self):
         log.info("TaskPublisher started.")
         
-        super().__init__('send_task_publisher')
-        self.publisher = self.create_publisher(Task, '/task_1', 10)
+        super().__init__("task_publisher_1")
+        self.publisher = self.create_publisher(Task, "/task_1", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
         
     def timer_callback(self):
         task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
         
-        # if (task_planner.item != None) and (task_planner.robot == 1):
-        if task_planner.item != None:
+        if (task_planner.item != None) and (task_planner.robot == 1):
             log.info(task_planner.item.waypoints)
             
             msg = Task()
@@ -177,7 +176,7 @@ class TaskPublisher1(Node):
         
 class TaskQueuePublisher(Node):
     def __init__(self):
-        super().__init__('send_queue_publisher')
+        super().__init__('task_queue_publisher')
         self.publisher = self.create_publisher(TaskQueue, '/task_queue', 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.timer_callback)
         
@@ -220,30 +219,13 @@ class DoneTaskSubscriber1(Node):
         if msg.data == 'OK':
             task_planner = TaskPlanning()
             task_planner.get_done(1)
-            
-            
-class DoneTaskSubscriber2(Node):
-    def __init__(self):
-        super().__init__('done_task_subscriber_2')
-        self.subscription = self.create_subscription(
-            String,
-            'robot2/done_task',
-            self.listener_callback,
-            10)
-
-    def listener_callback(self, msg):
-        log.info("listening..." + msg.data)
-        
-        if msg.data == 'OK':
-            task_planner = TaskPlanning()
-            task_planner.get_done(2)
 
 
 def main():
     rclpy.init()
     executor = MultiThreadedExecutor()
     
-    task_subscriber = TaskSubscriber()  # UI에서 요청 받음
+    task_request_subscriber = TaskRequestSubscriber()  # UI에서 요청 받음
     task_queue_publisher = TaskQueuePublisher()  # UI로 로봇 할당 안된 업무 목록 보내기
     robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
     task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
@@ -251,7 +233,7 @@ def main():
     astar_publisher_1 = AStarPublisher(robot='1')  # 로봇 이동 경로 publish
     done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
-    executor.add_node(task_subscriber)
+    executor.add_node(task_request_subscriber)
     executor.add_node(task_queue_publisher)
     executor.add_node(robot_status_publisher)
     executor.add_node(task_publisher)

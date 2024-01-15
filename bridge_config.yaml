@@ -1,0 +1,27 @@
+# Name of the domain bridge, used for node naming and logging
+name: nursing_home_bridge
+to_domain: 91
+topics:
+  amcl_pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    from_domain: 99
+    remap: amcl_pose_1
+  done_task:
+    type: std_msgs/msg/String
+    from_domain: 99
+    remap: done_task_1
+  cmd_vel_1:
+    type: geometry_msgs/msg/Twist
+    from_domain: 91
+    to_domain: 99
+    remap: cmd_vel
+  goal_pose_1:
+    type: geometry_msgs/msg/PoseStamped
+    from_domain: 91
+    to_domain: 99
+    remap: goal_pose
+  task_1:
+    type: interfaces_pkg/msg/Task
+    from_domain: 91
+    to_domain: 99
+    remap: task
