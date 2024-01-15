@@ -14,7 +14,6 @@ from interfaces_pkg.msg import *
 
 log = Logger(__name__)
 task_planner = TaskPlanning()
-path_planner = AStarPlanner(resolution=1, rr=0.4, padding=5)
 
 amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
