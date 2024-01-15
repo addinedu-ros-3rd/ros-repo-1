@@ -73,8 +73,19 @@ class AStarPublisher(Node):
         self.goal_subscriber = self.create_subscription(TaskRequest, '/task_' + str(robot), self.task_callback, 10)
 
         self.astar_planner = AStarPlanner(resolution=0.7, rr=0.3, padding=5)
-        self.now_x = 0
-        self.now_y = 0
+        
+        if robot == 1:
+            self.now_x = amcl_1.pose.pose.position.x
+            self.now_y = amcl_1.pose.pose.position.y
+        elif robot == 2:
+            self.now_x = amcl_2.pose.pose.position.x
+            self.now_y = amcl_2.pose.pose.position.y
+        elif robot == 3:
+            self.now_x = amcl_3.pose.pose.position.x
+            self.now_y = amcl_3.pose.pose.position.y
+        else:
+            log.error('not registered robot')
+            
 
     def task_callback(self, msg):
         # _, _, ori_z, ori_w = quaternion_from_euler()
@@ -168,6 +179,7 @@ class TaskPublisher1(Node):
             # path planning을 여기에서 해야 할 것 같다
             
             self.publisher.publish(msg)
+            task_planner.item = None
         
         
 class TaskQueuePublisher(Node):
@@ -226,7 +238,7 @@ def main():
     robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
     task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
     amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
-    astar_publisher_1 = AStarPublisher(robot='1')  # 로봇 이동 경로 publish
+    astar_publisher_1 = AStarPublisher(robot=1)  # 로봇 이동 경로 publish
     done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
     executor.add_node(task_request_subscriber)

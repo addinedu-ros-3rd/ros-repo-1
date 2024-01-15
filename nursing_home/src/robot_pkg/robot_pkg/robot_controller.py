@@ -9,24 +9,27 @@ from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
 
-class SendTaskSubscriber(Node):
+class TaskSubscriber(Node):
     def __init__(self):
         super().__init__('send_task_subscriber')
-
-        self.task_subscription = self.create_subscription(TaskRequest, 'task', self.listener_callback, 10)
+        
+        self.subscription = self.create_subscription(
+            TaskRequest,
+            'task',
+            self.listener_callback,
+            10)
         
     def listener_callback(self, msg):
-        print("listening..." + msg)
-        # todo: basic navigator로 현재 로봇 실행
+        print(msg)
 
 
-# class DoneTaskPublisher(Node):
-#     def __init__(self):
-#         super().__init__('done_task_publisher')
-#         self.publisher = self.create_publisher(String, '/done_task', 10)
-#         msg = String()
-#         msg.data = "OK"
-#         self.publisher.publish(msg)
+class DoneTaskPublisher(Node):
+    def __init__(self):
+        super().__init__('done_task_publisher')
+        self.publisher = self.create_publisher(String, '/done_task', 10)
+        msg = String()
+        msg.data = "OK"
+        self.publisher.publish(msg)
         
 
 class GoPoseNode(Node):
@@ -91,7 +94,7 @@ class GoPoseNode(Node):
                 # Some navigation timeout to demo cancellation
                 if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
                     self.navigator.cancelTask()
-
+                                
         # Do something depending on the return code
         result = self.navigator.getResult()
         if result == TaskResult.SUCCEEDED:
@@ -105,13 +108,13 @@ class GoPoseNode(Node):
             print('Goal failed!')
         else:
             print('Goal has an invalid return status!')
-            
+                    
 
 def main():
     rclpy.init()
     executor = MultiThreadedExecutor()
     
-    send_task_subscriber = SendTaskSubscriber()
+    send_task_subscriber = TaskSubscriber()
     executor.add_node(send_task_subscriber)
     
     # navigation 수행 노드
