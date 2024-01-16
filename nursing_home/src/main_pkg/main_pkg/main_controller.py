@@ -2,13 +2,16 @@ from utils.custom_logger import Logger
 from tools.task_planning import TaskPlanning
 from tools.astar_planning import AStarPlanner
 
+import math
+from tf_transformations import quaternion_from_euler
+
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String
-from geometry_msgs.msg import PoseWithCovarianceStamped, Point
+from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
 from interfaces_pkg.msg import *
 
 
@@ -99,15 +102,17 @@ class AStarPublisher(Node):
         astar_paths_msg.length = len(tpx)
 
         for i in range(len(tpx)):
-            tmp = Point()
-            tmp.x = tpx[i]
-            tmp.y = tpy[i]
-            # astar_paths.vec_x = tvec_x[1:]
-            # astar_paths.vec_y = tvec_y[1:]
+            tmp = Pose()
+            tmp.position.x = tpx[i]
+            tmp.position.y = tpy[i]
+
+            q = quaternion_from_euler(0, 0, math.atan2(tvec_y[i], tvec_x[i]), 'rxyz')
+            tmp.orientation.z = q[2]
+            tmp.orientation.w = q[3]
 
             astar_paths.append(tmp)
 
-        astar_paths_msg.positions = astar_paths
+        astar_paths_msg.poses = astar_paths
 
         self.astar_publisher.publish(astar_paths_msg)
         
