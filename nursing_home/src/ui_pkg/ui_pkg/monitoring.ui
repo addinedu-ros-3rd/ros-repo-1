@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1093</width>
+    <width>1395</width>
     <height>512</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
   <widget class="QPushButton" name="dark_btn">
    <property name="geometry">
     <rect>
-     <x>1040</x>
+     <x>1338</x>
      <y>17</y>
      <width>41</width>
      <height>25</height>
@@ -38,7 +38,7 @@
   <widget class="QPushButton" name="white_btn">
    <property name="geometry">
     <rect>
-     <x>1002</x>
+     <x>1300</x>
      <y>17</y>
      <width>41</width>
      <height>25</height>
@@ -478,7 +478,7 @@
   <widget class="QLabel" name="title_label">
    <property name="geometry">
     <rect>
-     <x>420</x>
+     <x>570</x>
      <y>10</y>
      <width>241</width>
      <height>31</height>
@@ -511,6 +511,61 @@
     <string/>
    </property>
   </widget>
+  <widget class="QGroupBox" name="cctv_group">
+   <property name="geometry">
+    <rect>
+     <x>1090</x>
+     <y>50</y>
+     <width>291</width>
+     <height>451</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QLabel" name="cctv_cam">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>15</y>
+      <width>271</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fall_btn">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>190</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>쓰러짐</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="cctv_label">
+   <property name="geometry">
+    <rect>
+     <x>1100</x>
+     <y>30</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CCTV 🟢</string>
+   </property>
+  </widget>
   <zorder>label</zorder>
   <zorder>cam_group</zorder>
   <zorder>white_btn</zorder>
@@ -519,6 +574,8 @@
   <zorder>map_group</zorder>
   <zorder>time_label</zorder>
   <zorder>title_label</zorder>
+  <zorder>cctv_group</zorder>
+  <zorder>cctv_label</zorder>
  </widget>
  <resources/>
  <connections/>

@@ -118,18 +118,24 @@ class WindowClass(QMainWindow, from_class):
         self.dark_btn.clicked.connect(self.change_to_black)
         self.white_btn.clicked.connect(self.change_to_white)
 
-        self.zeroto255 = [self.time_label, self.title_label, self.robot_table, self.queue_label,
+        self.zeroto255 = [self.time_label, self.title_label, self.robot_table, self.queue_label, self.cctv_label,
                           self.serve_mode, self.serve_btn, self.serve_stop, self.normal_mode, self.clear_btn,
-                          self.task_combo, self.location_combo, self.call_btn, self.task_queue]
+                          self.task_combo, self.location_combo, self.call_btn, self.task_queue, self.fall_btn]
         
-        self.labels = [self.map_group, self.cam_group, self.request_group]
+        self.labels = [self.map_group, self.cam_group, self.request_group, self.cctv_group]
 
         # 요청하기
         self.call_btn.clicked.connect(self.add)
+
+        # 한얼님 테스트
+        self.fall_btn.clicked.connect(self.fall)
         
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
+    
+    def fall(self):
+        self.cctv_label.setText("Emergency 🔴")
         
         
     def set_combo(self):
