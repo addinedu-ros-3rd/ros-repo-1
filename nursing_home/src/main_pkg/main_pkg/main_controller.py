@@ -69,28 +69,18 @@ class AMCLSubscriber(Node):
 
 class AStarPublisher(Node):
     def __init__(self, robot) :
-        super().__init__('astar_publisher')
+        super().__init__('astar_publisher_' + str(robot))
 
         self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_' + str(robot), 10)
         self.goal_subscriber = self.create_subscription(TaskRequest, '/task_' + str(robot), self.task_callback, 10)
 
         self.astar_planner = AStarPlanner(resolution=0.7, rr=0.3, padding=5)
-        
-        if robot == 1:
-            self.now_x = amcl_1.pose.pose.position.x
-            self.now_y = amcl_1.pose.pose.position.y
-        elif robot == 2:
-            self.now_x = amcl_2.pose.pose.position.x
-            self.now_y = amcl_2.pose.pose.position.y
-        elif robot == 3:
-            self.now_x = amcl_3.pose.pose.position.x
-            self.now_y = amcl_3.pose.pose.position.y
-        else:
-            log.error('not registered robot')
             
 
     def task_callback(self, msg):
-        # _, _, ori_z, ori_w = quaternion_from_euler()
+        self.now_x = amcl_1.pose.pose.position.x
+        self.now_y = amcl_1.pose.pose.position.y
+
 
         pose_stamp = PoseWithCovarianceStamped()
         pose_stamp.header.frame_id = 'map'
