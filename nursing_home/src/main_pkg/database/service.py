@@ -99,8 +99,8 @@ class DataManager:
             query = """
                     select ttt1.id, ttt1.status, IFNULL(tt.meaning, ''), IFNULL(ttt1.place, '')
                     from (select tt1.id, tt1.status, t.task_type_id, t.place
-                        from (SELECT t1.id, t1.pos, t1.battery, t1.status, rwm.meaning
-                            FROM (SELECT r.id, r.pos, r.battery, rs.meaning as status, r.robot_work_mode_id
+                        from (SELECT t1.id, t1.battery, t1.status, rwm.meaning
+                            FROM (SELECT r.id, r.battery, rs.meaning as status, r.robot_work_mode_id
                                     FROM robot r
                                     join robot_status rs
                                     on r.robot_status_id = rs.id) t1
