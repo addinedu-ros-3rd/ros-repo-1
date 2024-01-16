@@ -54,6 +54,7 @@ class DataManager:
                     AND finished_at IS NULL
                     """
             done_task = db.executeAndFetchOne(query, (robot,))
+            log.info(("done_task: ", done_task))
             
             return done_task
         
@@ -80,10 +81,10 @@ class DataManager:
             log.error(f"update_robot_status : {e}")
             
             
-    def update_task_done(self, task):
+    def update_task_done(self, task_id):
         try:
             query = "UPDATE task SET finished_at = now() WHERE id = (%s)"
-            db.execute(query, (task.id,))
+            db.execute(query, (task_id,))
             
         except Exception as e:
             log.error(f"update_task_done : {e}")
@@ -112,10 +113,11 @@ class DataManager:
                             join robot_work_mode rwm
                             on t1.robot_work_mode_id = rwm.id) tt1
                         left join task t
-                        on tt1.id = t.robot_id) ttt1
+                        on tt1.id = t.robot_id
+                        where t.started_at IS NOT NULL and t.finished_at IS NULL) ttt1
                     left join task_type tt
                     on ttt1.task_type_id = tt.id
-                    """;
+                    """
             robot_status_list = db.executeAndFetchAll(query)
             
             return robot_status_list

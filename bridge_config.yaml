@@ -4,29 +4,29 @@ to_domain: 91
 topics:
   amcl_pose:
     type: geometry_msgs/msg/PoseWithCovarianceStamped
-    from_domain: 99
+    from_domain: 97
     remap: amcl_pose_1
   done_task:
     type: std_msgs/msg/String
-    from_domain: 99
+    from_domain: 97
     remap: done_task_1
   cmd_vel_1:
     type: geometry_msgs/msg/Twist
     from_domain: 91
-    to_domain: 99
+    to_domain: 97
     remap: cmd_vel
   goal_pose_1:
     type: geometry_msgs/msg/PoseStamped
     from_domain: 91
-    to_domain: 99
+    to_domain: 97
     remap: goal_pose
   task_1:
     type: interfaces_pkg/msg/TaskRequest
     from_domain: 91
-    to_domain: 99
+    to_domain: 97
     remap: task
   astar_paths_1:
     type: interfaces_pkg/msg/AstarMsg
     from_domain: 91
-    to_domain: 99
+    to_domain: 97
     remap: astar_paths
