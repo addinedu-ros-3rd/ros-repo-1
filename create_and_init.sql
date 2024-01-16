@@ -54,9 +54,13 @@ CREATE TABLE `robot` (
   `id` int NOT NULL AUTO_INCREMENT,
   `battery` int NOT NULL,
   `ros_domain_id` int NOT NULL,
-  `robot_status_id` varchar(16) NOT NULL,
-  `robot_work_mode_id` varchar(16) NOT NULL,
-  PRIMARY KEY (`id`)
+  `robot_status_id` int NOT NULL,
+  `robot_work_mode_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_robot_status` (`robot_status_id`),
+  KEY `fk_robot_work_mode` (`robot_work_mode_id`),
+  CONSTRAINT `fk_robot_status` FOREIGN KEY (`robot_status_id`) REFERENCES `robot_status` (`id`),
+  CONSTRAINT `fk_robot_work_mode` FOREIGN KEY (`robot_work_mode_id`) REFERENCES `robot_work_mode` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -66,7 +70,7 @@ CREATE TABLE `robot` (
 
 LOCK TABLES `robot` WRITE;
 /*!40000 ALTER TABLE `robot` DISABLE KEYS */;
-INSERT INTO `robot` VALUES (1,100,99,'2','1'),(2,100,99,'2','1'),(3,90,99,'2','1');
+INSERT INTO `robot` VALUES (1,100,99,2,1),(2,100,99,2,1),(3,90,99,2,1);
 /*!40000 ALTER TABLE `robot` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -192,4 +196,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-01-15 21:29:38
+-- Dump completed on 2024-01-16 10:13:33
