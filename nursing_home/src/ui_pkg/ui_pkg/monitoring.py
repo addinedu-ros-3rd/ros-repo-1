@@ -29,13 +29,25 @@ class PiCamSubscriber(Node):
 
         self.ui = ui
 
-        self.subscription = self.create_subscription(
+        self.sub1 = self.create_subscription(
             CompressedImage,
             'image_raw/compressed_1',
-            self.listener_callback,
+            self.listener_callback1,
+            10)
+        
+        self.sub2 = self.create_subscription(
+            CompressedImage,
+            'image_raw/compressed_2',
+            self.listener_callback2,
+            10)
+        
+        self.sub3 = self.create_subscription(
+            CompressedImage,
+            'image_raw/compressed_3',
+            self.listener_callback3,
             10)
 
-    def listener_callback(self, data):
+    def listener_callback1(self, data):
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
@@ -44,6 +56,26 @@ class PiCamSubscriber(Node):
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
         self.ui.cam_r3_1.setPixmap(pixmap)
+        
+    def listener_callback2(self, data):
+        np_arr = np.frombuffer(data.data, np.uint8)
+        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+        height, width, channel = image_np.shape
+        bytes_per_line = 3 * width
+        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_image)
+        self.ui.cam_r3_2.setPixmap(pixmap)
+        
+    def listener_callback3(self, data):
+        np_arr = np.frombuffer(data.data, np.uint8)
+        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+        height, width, channel = image_np.shape
+        bytes_per_line = 3 * width
+        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_image)
+        self.ui.cam_r3_3.setPixmap(pixmap)
 
 class RobotStatusSubscriber(Node):
     def __init__(self, ui):

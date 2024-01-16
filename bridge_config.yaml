@@ -6,10 +6,41 @@ topics:
     type: geometry_msgs/msg/PoseWithCovarianceStamped
     from_domain: 99
     remap: amcl_pose_1
+  amcl_pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    from_domain: 47
+    remap: amcl_pose_2
+  amcl_pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    from_domain: 35
+    remap: amcl_pose_3
+
   done_task:
     type: std_msgs/msg/String
     from_domain: 99
     remap: done_task_1
+  done_task:
+    type: std_msgs/msg/String
+    from_domain: 47
+    remap: done_task_2
+  done_task:
+    type: std_msgs/msg/String
+    from_domain: 35
+    remap: done_task_3
+
+  image_raw/compressed:
+    type: sensor_msgs/msg/CompressedImage
+    from_domain: 99
+    remap: image_raw/compressed_1
+  image_raw/compressed:
+    type: sensor_msgs/msg/CompressedImage
+    from_domain: 47
+    remap: image_raw/compressed_2
+  image_raw/compressed:
+    type: sensor_msgs/msg/CompressedImage
+    from_domain: 35
+    remap: image_raw/compressed_3
+
   task_1:
     type: interfaces_pkg/msg/TaskRequest
     from_domain: 91
@@ -19,4 +50,24 @@ topics:
     type: interfaces_pkg/msg/AstarMsg
     from_domain: 91
     to_domain: 99
+    remap: astar_paths
+  task_2:
+    type: interfaces_pkg/msg/TaskRequest
+    from_domain: 91
+    to_domain: 47
+    remap: task
+  astar_paths_2:
+    type: interfaces_pkg/msg/AstarMsg
+    from_domain: 91
+    to_domain: 47
+    remap: astar_paths
+  task_3:
+    type: interfaces_pkg/msg/TaskRequest
+    from_domain: 91
+    to_domain: 35
+    remap: task
+  astar_paths_3:
+    type: interfaces_pkg/msg/AstarMsg
+    from_domain: 91
+    to_domain: 35
     remap: astar_paths
