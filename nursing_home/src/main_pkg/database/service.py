@@ -116,6 +116,7 @@ class DataManager:
                         on tt1.id = t.robot_id) ttt1
                     left join task_type tt
                     on ttt1.task_type_id = tt.id
+                    group by ttt1.id
                     """
             robot_status_list = db.executeAndFetchAll(query)
             
