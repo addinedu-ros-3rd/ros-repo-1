@@ -49,15 +49,15 @@ class AMCLSubscriber(Node):
     def __init__(self):
         super().__init__('amcl_subscriber')
 
-        # amcl_pose_qos = QoSProfile(
-        #   durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
-        #   reliability=QoSReliabilityPolicy.RELIABLE,
-        #   history=QoSHistoryPolicy.KEEP_LAST,
-        #   depth=1)
+        amcl_pose_qos = QoSProfile(
+          durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+          reliability=QoSReliabilityPolicy.RELIABLE,
+          history=QoSHistoryPolicy.KEEP_LAST,
+          depth=1)
         
-        self.amcl_subscriber_1 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_1', self.amcl_callback_1, qos_profile_sensor_data) # 아직 어떤 로봇 불러올지 안맞춤
-        self.amcl_subscriber_2 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_2', self.amcl_callback_2, qos_profile_sensor_data) # 아직 어떤 로봇 불러올지 안맞춤
-        self.amcl_subscriber_3 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_3', self.amcl_callback_3, qos_profile_sensor_data) # 아직 어떤 로봇 불러올지 안맞춤
+        self.amcl_subscriber_1 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_1', self.amcl_callback_1, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+        self.amcl_subscriber_2 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_2', self.amcl_callback_2, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+        self.amcl_subscriber_3 = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose_3', self.amcl_callback_3, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
 
 
     def amcl_callback_1(self, msg):
