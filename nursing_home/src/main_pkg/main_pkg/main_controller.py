@@ -222,12 +222,12 @@ class DoneTaskSubscriber1(Node):
         super().__init__('done_task_subscriber_1')
         self.subscription = self.create_subscription(
             String,
-            'robot1/done_task',
+            'done_task_1',
             self.listener_callback,
             10)
 
     def listener_callback(self, msg):
-        log.info("listening..." + msg.data)
+        log.info("done_task_1 : " + msg.data)
         
         if msg.data == 'OK':
             task_planner = TaskPlanning()
