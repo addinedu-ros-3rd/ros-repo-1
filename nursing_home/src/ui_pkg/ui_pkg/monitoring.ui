@@ -539,19 +539,6 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="fall_btn">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>190</y>
-      <width>89</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>쓰러짐</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QLabel" name="cctv_label">
    <property name="geometry">
