@@ -10,9 +10,6 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
-        ('lib/' + package_name + '/database/', glob.glob('database/*.*')),
-        ('lib/' + package_name + '/tools/', glob.glob('tools/*.*')),
-        ('lib/' + package_name + '/utils/', glob.glob('utils/*.*')),
         ('share/' + package_name + '/utils/', glob.glob('utils/config.ini')),
         ('share/' + package_name + '/map/', glob.glob('map/*.*')),
         ('share/' + package_name, ['package.xml']),
