@@ -8,6 +8,7 @@ from threading import Thread
 
 from interfaces_pkg.msg import *
 from std_msgs.msg import String
+from sensor_msgs.msg import CompressedImage
 from database.service_ui import DataManager
 
 from ament_index_python.packages import get_package_share_directory
@@ -15,10 +16,34 @@ from ament_index_python.packages import get_package_share_directory
 import sys
 import rclpy as rp
 import os
+import cv2
+import numpy as np
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
 from_class = uic.loadUiType(ui_file)[0]
 
+class PiCamSubscriber(Node):
+    def __init__(self, ui):
+
+        super().__init__('pi_cam_subscriber')
+
+        self.ui = ui
+
+        self.subscription = self.create_subscription(
+            CompressedImage,
+            'image_raw/compressed_1',
+            self.listener_callback,
+            10)
+
+    def listener_callback(self, data):
+        np_arr = np.frombuffer(data.data, np.uint8)
+        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+        height, width, channel = image_np.shape
+        bytes_per_line = 3 * width
+        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_image)
+        self.ui.cam_r3_1.setPixmap(pixmap)
 
 class RobotStatusSubscriber(Node):
     def __init__(self, ui):
@@ -33,7 +58,6 @@ class RobotStatusSubscriber(Node):
             1
         )
 
-
     def callback(self, msg):
         
         self.ui.robot_table.setItem(0, 0, QTableWidgetItem(msg.robot1.status))
@@ -47,8 +71,7 @@ class RobotStatusSubscriber(Node):
         self.ui.robot_table.setItem(2, 0, QTableWidgetItem(msg.robot3.status))
         self.ui.robot_table.setItem(2, 1, QTableWidgetItem(msg.robot3.task))
         self.ui.robot_table.setItem(2, 2, QTableWidgetItem(msg.robot3.goal))
-        
-        
+
 class TaskQueueSubscriber(Node):
     def __init__(self, ui):
         super().__init__('task_queue_subscriber')
@@ -60,7 +83,6 @@ class TaskQueueSubscriber(Node):
             self.callback,
             1
         )
-        
         
     def callback(self, msg):
         if len(msg.data) != self.ui.task_queue.rowCount():
@@ -133,7 +155,7 @@ class WindowClass(QMainWindow, from_class):
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
-    
+
     def fall(self):
         self.cctv_label.setText("Emergency 🔴")
         
@@ -228,13 +250,16 @@ def main():
     app = QApplication(sys.argv)
     myWindows = WindowClass()
     myWindows.show()
-    
+
+    pi_cam_subscriber = PiCamSubscriber(myWindows)
+    executor.add_node(pi_cam_subscriber)
+
     robot_status_subscriber = RobotStatusSubscriber(myWindows)
     executor.add_node(robot_status_subscriber)
     
     task_queue_subscriber = TaskQueueSubscriber(myWindows)
     executor.add_node(task_queue_subscriber)
-    
+
     thread = Thread(target=executor.spin)
     thread.start()
     
