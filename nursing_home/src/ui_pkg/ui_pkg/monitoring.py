@@ -104,6 +104,23 @@ class RobotStatusSubscriber(Node):
         self.ui.robot_table.setItem(2, 1, QTableWidgetItem(msg.robot3.task))
         self.ui.robot_table.setItem(2, 2, QTableWidgetItem(msg.robot3.goal))
 
+
+class EmergencySubscriber(Node):
+    def __init__(self, ui):
+        super().__init__('emergency_status_subscriber')
+
+        self.ui = ui
+        self.subscription = self.create_subscription(
+            String,
+            'action_rec',
+            self.callback,
+            1
+        )
+
+    def callback(self, msg):
+        self.cctv_label.setText("Emergency 🔴")
+
+
 class TaskQueueSubscriber(Node):
     def __init__(self, ui):
         super().__init__('task_queue_subscriber')
