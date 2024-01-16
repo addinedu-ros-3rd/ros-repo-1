@@ -18,6 +18,9 @@ from interfaces_pkg.msg import *
 log = Logger(__name__)
 task_planner = TaskPlanning()
 
+global amcl_1
+global amcl_2
+global amcl_3
 amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
 amcl_3 = PoseWithCovarianceStamped()
@@ -58,12 +61,15 @@ class AMCLSubscriber(Node):
 
 
     def amcl_callback_1(self, msg):
+        global amcl_1
         amcl_1 = msg
 
     def amcl_callback_2(self, msg):
+        global amcl_2
         amcl_2 = msg
 
     def amcl_callback_3(self, msg):
+        global amcl_3
         amcl_3 = msg
 
 

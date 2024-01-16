@@ -10,8 +10,7 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
-        ('share/' + package_name + '/tools/', glob.glob('tools/*.*')),
-        ('share/' + package_name + '/utils/', glob.glob('utils/*.*')),
+        ('lib/' + package_name + '/tools/', glob.glob('tools/*.*')),
         ('share/' + package_name + '/map/', glob.glob('map/*.*')),
         ('share/' + package_name, ['package.xml']),
     ],
