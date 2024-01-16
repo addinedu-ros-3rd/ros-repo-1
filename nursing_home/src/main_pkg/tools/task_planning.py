@@ -56,7 +56,7 @@ class TaskPlanning():
     
     def get_done(self, robot):
         # 로봇이 배정되어서 시작 후 종료되지 않은 업무 조회
-        done_task = dm.select_task(robot)
+        done_task = dm.select_task_done(robot)
         # 업무 완료 처리
         dm.update_task_done(done_task)
         
