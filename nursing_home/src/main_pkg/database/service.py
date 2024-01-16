@@ -103,7 +103,10 @@ class DataManager:
     def select_all_robot_status(self):
         try:
             query = """
-                    select ttt1.id, ttt1.status, IFNULL(tt.meaning, ''), IFNULL(ttt1.place, '')
+                    select ttt1.id as id,
+                            ttt1.status as status,
+                            CASE status WHEN '대기중' THEN '' ELSE tt.meaning END as task,
+                            CASE status WHEN '대기중' THEN '' ELSE ttt1.place END as place
                     from (select tt1.id, tt1.status, t.task_type_id, t.place
                         from (SELECT t1.id, t1.battery, t1.status, rwm.meaning
                             FROM (SELECT r.id, r.battery, rs.meaning as status, r.robot_work_mode_id

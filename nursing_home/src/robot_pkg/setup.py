@@ -10,6 +10,8 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
+        ('share/' + package_name + '/tools/', glob.glob('tools/*.*')),
+        ('share/' + package_name + '/utils/', glob.glob('utils/*.*')),
         ('share/' + package_name + '/map/', glob.glob('map/*.*')),
         ('share/' + package_name, ['package.xml']),
     ],
@@ -22,7 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'robot_controller = robot_pkg.robot_controller:main'
+            'robot_controller = robot_pkg.robot_controller:main',
+            'pycam_controller = robot_pkg.pycam_controller:main'
         ],
     },
 )
