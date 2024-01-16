@@ -113,8 +113,7 @@ class DataManager:
                             join robot_work_mode rwm
                             on t1.robot_work_mode_id = rwm.id) tt1
                         left join task t
-                        on tt1.id = t.robot_id
-                        where t.started_at IS NOT NULL and t.finished_at IS NULL) ttt1
+                        on tt1.id = t.robot_id) ttt1
                     left join task_type tt
                     on ttt1.task_type_id = tt.id
                     """
