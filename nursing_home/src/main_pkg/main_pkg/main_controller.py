@@ -159,17 +159,17 @@ class TaskPublisher1(Node):
         
         if task_planner.item != None:
         # if (task_planner.item != None) and (task_planner.robot == 1):
-            log.info(task_planner.item.waypoints)
+            log.info(task_planner.item.goal_point)
             
             msg = TaskRequest()
             
-            x = task_planner.item.waypoints.split(",")[0].replace("[", "")
+            x = task_planner.item.goal_point.split(",")[0].replace("[", "")
             log.info(x)
             
-            y = task_planner.item.waypoints.split(",")[1]
+            y = task_planner.item.goal_point.split(",")[1]
             log.info(y)
             
-            z = task_planner.item.waypoints.split(",")[2].replace("]", "")
+            z = task_planner.item.goal_point.split(",")[2].replace("]", "")
             log.info(z)
             
             msg.position.x = float(x)
