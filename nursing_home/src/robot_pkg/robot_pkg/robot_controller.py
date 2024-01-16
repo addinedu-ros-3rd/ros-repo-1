@@ -84,6 +84,9 @@ class GoPoseNode(Node):
             # Do something depending on the return code
             result = self.navigator.getResult()
             if result == TaskResult.SUCCEEDED:
+                msg = String()
+                msg.data = "OK"
+                self.done_publisher.publish(msg)
                 print('Goal succeeded!')
                 if i == astar_paths.length - 1:
                     break
