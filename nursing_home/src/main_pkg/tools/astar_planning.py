@@ -119,10 +119,6 @@ class AStarPlanner:
         sy = (sy_real - self.map_origin[1]) / self.map_resolution
         gx = (gx_real - self.map_origin[0]) / self.map_resolution
         gy = (gy_real - self.map_origin[1]) / self.map_resolution
-        # sx = (sx_real / self.map_resolution) - self.map_origin[0]
-        # sy = (sy_real / self.map_resolution) - self.map_origin[1]
-        # gx = (gx_real / self.map_resolution) - self.map_origin[0]
-        # gy = (gy_real / self.map_resolution) - self.map_origin[1]
         
         print(sx_real, sy_real, gx_real, gy_real)
         print(sx, sy, gx, gy)
@@ -151,6 +147,7 @@ class AStarPlanner:
                 print("Find goal")
                 goal_node.parent_index = current.parent_index
                 goal_node.cost = current.cost
+                goal_node.vector = current.vector
                 break
 
             # Remove the item from the open set
@@ -161,9 +158,6 @@ class AStarPlanner:
 
             # expand_grid search grid based on motion model
             for i, _ in enumerate(self.motion):
-                # node = self.Node(current.x + self.motion[i][0],
-                #                  current.y + self.motion[i][1],
-                #                  current.cost + self.motion[i][2], c_id)
 
                 is_turned = 0
                 before_vector = (0, 0)
@@ -227,22 +221,12 @@ class AStarPlanner:
             if is_turned:
                 tpx.append(now_node.x)
                 tpy.append(now_node.y)
-                # tpx.append(self.calc_grid_position(now_node.x, self.min_x))
-                # tpy.append(self.calc_grid_position(now_node.y, self.min_y))
-                # tvec_x.append(now_node.vector[0])
-                # tvec_y.append(now_node.vector[1])
+                tvec_x.append(now_node.vector[0])
+                tvec_y.append(now_node.vector[1])
 
             parent_index = n.parent_index
             now_node = n
             before_vector = now_vector
-
-        # append start point
-        # tpx.append(self.calc_grid_position(now_node.x, self.min_x))
-        # tpy.append(self.calc_grid_position(now_node.y, self.min_y))
-        tpx.append(now_node.x)
-        tpy.append(now_node.y)
-        # tvec_x.append(now_node.vector[0])
-        # tvec_y.append(now_node.vector[1])
         
         return rx, ry, tpx[::-1], tpy[::-1], tvec_x[::-1], tvec_y[::-1]
 
@@ -291,11 +275,6 @@ class AStarPlanner:
         # collision check
         if self.obstacle_map[node.x][node.y]:
             return False
-        # try:
-        #     if self.obstacle_map[node.x][node.y]:
-        #         return False
-        # except:
-        #     return False
 
         return True
 
@@ -358,12 +337,6 @@ def main():
     robot_radius = 0.3  # [m]
     padding = 3
 
-
-    # gx = np.random.randint(2, map_width-2)
-    # gy = np.random.randint(2, map_height-2)
-    # while map_data[gx][gy] == 0:
-    #     gx = np.random.randint(2, map_width-2)
-    #     gy = np.random.randint(2, map_height-2)
 
     a_star = AStarPlanner(grid_size, robot_radius, padding)
 

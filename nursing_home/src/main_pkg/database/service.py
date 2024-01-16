@@ -45,9 +45,14 @@ class DataManager:
             log.error(f"select_not_working_robot : {e}")
             
             
-    def select_task(self, robot):
+    def select_task_done(self, robot):
         try:
-            query = "SELECT id FROM task WHERE robot_id = (%s)"
+            query = """
+                    SELECT id FROM task
+                    WHERE robot_id = (%s)
+                    AND started_at IS NOT NULL
+                    AND finished_at IS NULL
+                    """
             done_task = db.executeAndFetchOne(query, (robot,))
             
             return done_task

@@ -1,2 +1,2 @@
 int32 length
-geometry_msgs/Point[] positions
+geometry_msgs/Pose[] poses
