@@ -67,17 +67,16 @@ class ActionPublisher(Node):
 
                 action_output_frame, self.action_output_data = self.Action.predict(img)
 
-                if self.action_output_data == 'Collapsed':
-                    msg.data = self.action_output_data
-                    self.publisher.publish(msg)
+                # if self.action_output_data == 'Collapsed':
+                msg.data = self.action_output_data
+                self.publisher.publish(msg)
 
-                print(self.action_output_data) ####################
+                print(self.action_output_data)
                 
                 cv2.imshow("Action Cam", action_output_frame)
                 cv2.waitKey(1)
 
-            # else:
-            #     break
+            
         
         # self.cap.release()
         # cv2.destroyAllWindows()
