@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1395</width>
-    <height>516</height>
+    <width>1419</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,8 @@
   <widget class="QPushButton" name="dark_btn">
    <property name="geometry">
     <rect>
-     <x>1338</x>
-     <y>17</y>
+     <x>1358</x>
+     <y>50</y>
      <width>41</width>
      <height>25</height>
     </rect>
@@ -38,8 +38,8 @@
   <widget class="QPushButton" name="white_btn">
    <property name="geometry">
     <rect>
-     <x>1300</x>
-     <y>17</y>
+     <x>1320</x>
+     <y>50</y>
      <width>41</width>
      <height>25</height>
     </rect>
@@ -145,8 +145,8 @@
   <widget class="QGroupBox" name="cam_group">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>50</y>
+     <x>380</x>
+     <y>80</y>
      <width>591</width>
      <height>161</height>
     </rect>
@@ -230,10 +230,10 @@
   <widget class="QGroupBox" name="request_group">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>220</y>
+     <x>380</x>
+     <y>296</y>
      <width>591</width>
-     <height>281</height>
+     <height>291</height>
     </rect>
    </property>
    <property name="title">
@@ -243,7 +243,7 @@
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>30</y>
+      <y>40</y>
       <width>221</width>
       <height>192</height>
      </rect>
@@ -263,7 +263,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>240</y>
+      <y>250</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -273,7 +273,7 @@
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>240</y>
+      <y>250</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -296,7 +296,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
+      <y>240</y>
       <width>89</width>
       <height>41</height>
      </rect>
@@ -308,8 +308,8 @@
    <widget class="QPushButton" name="serve_stop">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>170</y>
+      <x>480</x>
+      <y>250</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -325,7 +325,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
+      <y>15</y>
       <width>325</width>
       <height>113</height>
      </rect>
@@ -376,7 +376,7 @@
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>240</y>
+      <y>250</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -402,7 +402,7 @@
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>10</y>
+      <y>20</y>
       <width>91</width>
       <height>17</height>
      </rect>
@@ -411,27 +411,14 @@
      <string>Task Queue</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="clear_btn">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>240</y>
-      <width>89</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Clear</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QLabel" name="time_label">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
+     <y>60</y>
      <width>119</width>
-     <height>16</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -461,39 +448,47 @@
     <string>Robot Controller</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="cctv_label">
    <property name="geometry">
     <rect>
-     <x>500</x>
-     <y>40</y>
-     <width>591</width>
-     <height>461</height>
+     <x>980</x>
+     <y>60</y>
+     <width>181</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string/>
+    <string>CCTV 🟢</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="cctv_group">
+  <widget class="QGroupBox" name="map_group">
    <property name="geometry">
     <rect>
-     <x>1090</x>
-     <y>50</y>
-     <width>291</width>
-     <height>451</height>
+     <x>10</x>
+     <y>80</y>
+     <width>363</width>
+     <height>549</height>
     </rect>
    </property>
    <property name="title">
     <string/>
    </property>
-   <widget class="QLabel" name="cctv_cam">
+   <widget class="QLabel" name="map_label">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>15</y>
-      <width>271</width>
-      <height>421</height>
+      <width>342</width>
+      <height>522</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <underline>false</underline>
+     </font>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -503,53 +498,86 @@
     </property>
    </widget>
   </widget>
-  <widget class="QLabel" name="cctv_label">
+  <widget class="QGroupBox" name="cctv_group">
    <property name="geometry">
     <rect>
-     <x>1100</x>
-     <y>30</y>
+     <x>980</x>
+     <y>80</y>
+     <width>421</width>
+     <height>508</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QLabel" name="cam_label">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>15</y>
+      <width>400</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <underline>false</underline>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="view_label">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>60</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Robot View</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="task_label">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>275</y>
      <width>181</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>CCTV 🟢</string>
+    <string>Robot Task</string>
    </property>
   </widget>
-  <widget class="QLabel" name="map_label">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>471</width>
-     <height>451</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <underline>false</underline>
-    </font>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <zorder>label</zorder>
   <zorder>cam_group</zorder>
   <zorder>white_btn</zorder>
   <zorder>dark_btn</zorder>
   <zorder>request_group</zorder>
   <zorder>time_label</zorder>
   <zorder>title_label</zorder>
-  <zorder>cctv_group</zorder>
   <zorder>cctv_label</zorder>
-  <zorder>map_label</zorder>
+  <zorder>map_group</zorder>
+  <zorder>cctv_group</zorder>
+  <zorder>view_label</zorder>
+  <zorder>task_label</zorder>
  </widget>
  <resources/>
  <connections/>

@@ -4,11 +4,14 @@ from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.qos import qos_profile_sensor_data
 from threading import Thread
+
+from cv_bridge import CvBridge
 
 from interfaces_pkg.msg import *
 from std_msgs.msg import String
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 from database.service_ui import DataManager
 
 from ament_index_python.packages import get_package_share_directory
@@ -23,6 +26,7 @@ ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.
 from_class = uic.loadUiType(ui_file)[0]
 
 class PiCamSubscriber(Node):
+
     def __init__(self, ui):
 
         super().__init__('pi_cam_subscriber')
@@ -76,6 +80,34 @@ class PiCamSubscriber(Node):
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
         self.ui.cam_r3_3.setPixmap(pixmap)
+
+
+class CctvVideoSubscriber(Node):
+    
+    def __init__(self, ui):
+
+        super().__init__('cctv_video_subscriber')
+        
+        self.ui = ui
+        self.subscription = self.create_subscription(
+            CompressedImage,
+            'cctv_video',
+            self.video_callback,
+            qos_profile_sensor_data)
+        
+        self.bridge = CvBridge()
+    
+    def video_callback(self, msg):
+        np_arr = np.frombuffer(msg.data, np.uint8)
+        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+        height, width, channel = image_np.shape
+        print(image_np.shape)
+        bytes_per_line = 3 * width
+        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_image)
+        self.ui.cam_label.setPixmap(pixmap)
+
 
 class RobotStatusSubscriber(Node):
     def __init__(self, ui):
@@ -164,9 +196,10 @@ class WindowClass(QMainWindow, from_class):
         timer.timeout.connect(self.time)
         timer.start(1000)
 
-        # 날짜 표시하기
-        # date = QDate.currentDate()
-        # self.label_3.setText(self.date.toString('yyyy년 MM월 dd일')
+        # 맵 표시하기
+        pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.map_label.setPixmap(pixmap.scaled(342,522, Qt.KeepAspectRatio))
+        self.show()
 
         # 토픽 발행하기
         self.count = 0
@@ -183,7 +216,6 @@ class WindowClass(QMainWindow, from_class):
         self.location_combo.hide()
         self.call_btn.hide()
         self.serve_stop.hide()
-        self.clear_btn.hide()
 
         self.serve_mode.clicked.connect(self.serve)
         self.normal_mode.clicked.connect(self.normal)
@@ -193,8 +225,8 @@ class WindowClass(QMainWindow, from_class):
         self.white_btn.clicked.connect(self.change_to_white)
 
         self.zeroto255 = [self.time_label, self.title_label, self.robot_table, self.queue_label, self.cctv_label,
-                          self.serve_mode, self.serve_btn, self.serve_stop, self.normal_mode, self.clear_btn,
-                          self.task_combo, self.location_combo, self.call_btn, self.task_queue]
+                          self.serve_mode, self.serve_btn, self.serve_stop, self.normal_mode, self.task_label,
+                          self.task_combo, self.location_combo, self.call_btn, self.task_queue, self.view_label]
         
         self.labels = [self.map_group, self.cam_group, self.request_group, self.cctv_group]
 
@@ -204,11 +236,6 @@ class WindowClass(QMainWindow, from_class):
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
-
-        pixmap = QPixmap('./src/main_pkg/map/home.pgm')
-        self.map_label.setPixmap(pixmap)
-        self.show()
- 
         
     def set_combo(self):
         task_type_list = self.dm.select_all_task_type()
@@ -264,17 +291,15 @@ class WindowClass(QMainWindow, from_class):
 
 
     def change_to_black(self):
-        self.change_colors('rgb(255,255,255)')    
-        # self.change_colors('rgb(249, 240, 107)')
+        self.change_colors('rgb(255,255,255)') 
         self.setStyleSheet("background-color: rgb(21,32,43);")
-        self.label.setPixmap(QtGui.QPixmap('')) 
         self.change_labels('rgb(34,48,60)')
 
 
     def change_to_white(self):    
         self.change_colors('rgb(0,0,0);')
-        self.change_labels('')
         self.setStyleSheet('')
+        self.change_labels('')
 
 
     def serve(self):
@@ -285,7 +310,6 @@ class WindowClass(QMainWindow, from_class):
         self.task_combo.show()
         self.location_combo.show()
         self.call_btn.show()
-        self.clear_btn.show()
 
 
     def time(self):
@@ -313,6 +337,9 @@ def main():
     
     task_queue_subscriber = TaskQueueSubscriber(myWindows)
     executor.add_node(task_queue_subscriber)
+
+    cctv_video_subscriber = CctvVideoSubscriber(myWindows)
+    executor.add_node(cctv_video_subscriber)
 
     thread = Thread(target=executor.spin)
     thread.start()
