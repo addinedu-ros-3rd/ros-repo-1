@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1395</width>
-    <height>512</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -314,6 +314,9 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
     <property name="text">
      <string>Stop</string>
     </property>
@@ -422,46 +425,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="map_group">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>471</width>
-     <height>451</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="title">
-    <string/>
-   </property>
-   <widget class="QLabel" name="map">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>15</y>
-      <width>451</width>
-      <height>421</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <underline>false</underline>
-     </font>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-  </widget>
   <widget class="QLabel" name="time_label">
    <property name="geometry">
     <rect>
@@ -553,16 +516,40 @@
     <string>CCTV 🟢</string>
    </property>
   </widget>
+  <widget class="QLabel" name="map_label">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>471</width>
+     <height>451</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <underline>false</underline>
+    </font>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
   <zorder>label</zorder>
   <zorder>cam_group</zorder>
   <zorder>white_btn</zorder>
   <zorder>dark_btn</zorder>
   <zorder>request_group</zorder>
-  <zorder>map_group</zorder>
   <zorder>time_label</zorder>
   <zorder>title_label</zorder>
   <zorder>cctv_group</zorder>
   <zorder>cctv_label</zorder>
+  <zorder>map_label</zorder>
  </widget>
  <resources/>
  <connections/>

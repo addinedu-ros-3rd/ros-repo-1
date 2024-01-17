@@ -108,8 +108,8 @@ class RobotStatusSubscriber(Node):
 class EmergencySubscriber(Node):
     def __init__(self, ui):
         super().__init__('emergency_status_subscriber')
-
         self.ui = ui
+
         self.subscription = self.create_subscription(
             String,
             'action_rec',
@@ -118,7 +118,11 @@ class EmergencySubscriber(Node):
         )
 
     def callback(self, msg):
-        self.cctv_label.setText("Emergency 🔴")
+        if msg.data == 'Collapsed':
+            self.ui.cctv_label.setText("Emergency 🔴")
+        else:
+            self.ui.cctv_label.setText("CCTV 🟢")
+            
 
 
 class TaskQueueSubscriber(Node):
@@ -147,7 +151,6 @@ class TaskQueueSubscriber(Node):
                     self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
                     self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
             
-
 
 class WindowClass(QMainWindow, from_class):
 
@@ -197,13 +200,15 @@ class WindowClass(QMainWindow, from_class):
 
         # 요청하기
         self.call_btn.clicked.connect(self.add)
-
-        # 한얼님 테스트
         
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
 
+        pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.map_label.setPixmap(pixmap)
+        self.show()
+ 
         
     def set_combo(self):
         task_type_list = self.dm.select_all_task_type()
@@ -258,8 +263,9 @@ class WindowClass(QMainWindow, from_class):
             target.setStyleSheet(f'background-color: {color_rgb};')
 
 
-    def change_to_black(self):    
-        self.change_colors('rgb(249, 240, 107)')
+    def change_to_black(self):
+        self.change_colors('rgb(255,255,255)')    
+        # self.change_colors('rgb(249, 240, 107)')
         self.setStyleSheet("background-color: rgb(21,32,43);")
         self.label.setPixmap(QtGui.QPixmap('')) 
         self.change_labels('rgb(34,48,60)')
