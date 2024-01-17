@@ -87,7 +87,6 @@ class AStarPublisher(Node):
         self.now_x = amcl_1.pose.pose.position.x
         self.now_y = amcl_1.pose.pose.position.y
 
-
         pose_stamp = PoseWithCovarianceStamped()
         pose_stamp.header.frame_id = 'map'
 
@@ -240,6 +239,8 @@ def main():
     task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
     amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
     astar_publisher_1 = AStarPublisher(robot=1)  # 로봇 이동 경로 publish
+    astar_publisher_2 = AStarPublisher(robot=2)
+    astar_publisher_3 = AStarPublisher(robot=3)
     done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
     executor.add_node(task_request_subscriber)
@@ -248,6 +249,8 @@ def main():
     executor.add_node(task_publisher)
     executor.add_node(amcl_subscriber)
     executor.add_node(astar_publisher_1)
+    executor.add_node(astar_publisher_2)
+    executor.add_node(astar_publisher_3)
     executor.add_node(done_task_1)
     
     executor.spin()
