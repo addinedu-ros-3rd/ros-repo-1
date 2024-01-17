@@ -36,6 +36,21 @@ class AmclSubscriber(Node):
         super().__init__('amcl_subscriber')
 
         self.ui = ui        
+
+        # 맵 표시하기
+        # map label geometry:
+        # X: 10
+        # Y: 15
+        # Width: 342
+        # Height: 522
+        self.pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.height = self.pixmap.size().height()
+        self.width = self.pixmap.size().width()
+        self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
+        self.ui.map_label.setPixmap(self.pixmap.scaled(342,522, Qt.KeepAspectRatio))
+        # self.show()
+
+
         amcl_pose_qos = QoSProfile(
                 durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
                 reliability=QoSReliabilityPolicy.RELIABLE,
@@ -51,10 +66,33 @@ class AmclSubscriber(Node):
         self.now_x = 0
         self.now_y = 0
 
+        self.map_resolution = 0.05
+        self.map_origin = (-0.629, -2.92)
+
+        self.painter = QPainter(self.ui.map_label.pixmap())
+        self.painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
+
+
     def amcl_callback(self, amcl):
         self.now_x = amcl.pose.pose.position.x
         self.now_y = amcl.pose.pose.position.y
         self.get_logger().info(f"{self.now_x}, {self.now_y}")
+
+        x, y = self.calc_grid_position(self.now_x, self.now_y)
+
+        # 맵 표시하기
+        # pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.ui.map_label.setPixmap(self.pixmap.scaled(342,522, Qt.KeepAspectRatio))
+        painter = QPainter(self.ui.map_label.pixmap())
+        painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
+        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+        painter.end
+
+
+    def calc_grid_position(self, x, y):
+        pos_x = (x - self.map_origin[0]) / self.map_resolution
+        pos_y = (y - self.map_origin[1]) / self.map_resolution
+        return pos_x, pos_y
 
 
 class PiCamSubscriber(Node):
@@ -133,8 +171,9 @@ class CctvVideoSubscriber(Node):
         np_arr = np.frombuffer(msg.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+        
         height, width, channel = image_np.shape
-        print(image_np.shape)
+        self.get_logger().info(image_np.shape)
         bytes_per_line = 3 * width
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
@@ -231,17 +270,6 @@ class WindowClass(QMainWindow, from_class):
         timer.timeout.connect(self.time)
         timer.start(1000)
 
-        # 맵 표시하기
-        pixmap = QPixmap('./src/main_pkg/map/home.pgm')
-        self.map_label.setPixmap(pixmap.scaled(342,522, Qt.KeepAspectRatio))
-        self.show()
-
-        # map label geometry:
-        # X: 10
-        # Y: 15
-        # Width: 342
-        # Height: 522
-
 
         # 토픽 발행하기
         self.count = 0
@@ -278,6 +306,7 @@ class WindowClass(QMainWindow, from_class):
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
+            
         
     def set_combo(self):
         task_type_list = self.dm.select_all_task_type()
