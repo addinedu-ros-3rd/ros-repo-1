@@ -30,7 +30,6 @@ TIMER_PERIOD = 0.5
 class TaskRequestSubscriber(Node):
 
     def __init__(self):
-        log.info("TaskRequestSubscriber started.")
         self.received_task = None
         
         super().__init__("task_request_subscriber")
@@ -115,8 +114,6 @@ class AStarPublisher(Node):
 class RobotStatusPublisher(Node):
     
     def __init__(self):
-        log.info("SendRobotStatusPublisher started.")
-        
         super().__init__("send_robot_status_publisher")
         self.publisher = self.create_publisher(RobotStatusList, "/robot_status", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.robot_status_timer_callback)
@@ -145,12 +142,10 @@ class RobotStatusPublisher(Node):
         self.publisher.publish(msg)
         
         
-class TaskPublisher1(Node):
-    def __init__(self):
-        log.info("TaskPublisher started.")
-        
-        super().__init__("task_publisher_1")
-        self.publisher = self.create_publisher(TaskRequest, "/task_1", 10)
+class TaskPublisher(Node):
+    def __init__(self, robot):
+        super().__init__("task_publisher_" + str(robot))
+        self.publisher = self.create_publisher(TaskRequest, "/task_" + str(robot), 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.task_timer_callback)
         
         
@@ -236,7 +231,9 @@ def main():
     task_request_subscriber = TaskRequestSubscriber()  # UI에서 요청 받음
     task_queue_publisher = TaskQueuePublisher()  # UI로 로봇 할당 안된 업무 목록 보내기
     robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
-    task_publisher = TaskPublisher1()  # 로봇 1에 좌표 보내기
+    task_publisher_1 = TaskPublisher(robot=1)  # 로봇 1에 좌표 보내기
+    task_publisher_2 = TaskPublisher(robot=2)
+    task_publisher_3 = TaskPublisher(robot=3)
     amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
     astar_publisher_1 = AStarPublisher(robot=1)  # 로봇 이동 경로 publish
     astar_publisher_2 = AStarPublisher(robot=2)
@@ -246,7 +243,9 @@ def main():
     executor.add_node(task_request_subscriber)
     executor.add_node(task_queue_publisher)
     executor.add_node(robot_status_publisher)
-    executor.add_node(task_publisher)
+    executor.add_node(task_publisher_1)
+    executor.add_node(task_publisher_2)
+    executor.add_node(task_publisher_3)
     executor.add_node(amcl_subscriber)
     executor.add_node(astar_publisher_1)
     executor.add_node(astar_publisher_2)

@@ -103,24 +103,40 @@ class DataManager:
     def select_all_robot_status(self):
         try:
             query = """
-                    select ttt1.robot_id as final_robot_id,
-                        ttt1.status as status,
-                        CASE status WHEN '대기중' THEN '' ELSE tt.meaning END as task,
-                        CASE status WHEN '대기중' THEN '' ELSE ttt1.place END as place
-                    from (select tt1.id as robot_id, tt1.status, t.task_type_id, t.place, t.id
-                        from (SELECT t1.id, t1.battery, t1.status, rwm.meaning
-                            FROM (SELECT r.id, r.battery, rs.meaning as status, r.robot_work_mode_id
-                                    FROM robot r
-                                    join robot_status rs
-                                    on r.robot_status_id = rs.id) t1
-                            join robot_work_mode rwm
-                            on t1.robot_work_mode_id = rwm.id) tt1
-                        left join task t
-                        on tt1.id = t.robot_id
-                        order by t.id desc) ttt1
-                    left join task_type tt
-                    on ttt1.task_type_id = tt.id
-                    group by final_robot_id
+                    SELECT 
+                        ttt1.robot_id,
+                        ttt1.status,
+                        CASE WHEN ttt1.status = '대기중' THEN '' ELSE MAX(tt.meaning) END as task,
+                        CASE WHEN ttt1.status = '대기중' THEN '' ELSE MAX(ttt1.place) END as place,
+                        MAX(ttt1.task_id) AS task_id
+                    FROM (
+                        SELECT 
+                            tt1.id as robot_id,
+                            tt1.status,
+                            t.task_type_id,
+                            t.place,
+                            t.id as task_id
+                        FROM (
+                            SELECT 
+                                t1.id,
+                                t1.battery,
+                                t1.status,
+                                rwm.meaning
+                            FROM (
+                                SELECT 
+                                    r.id,
+                                    r.battery,
+                                    rs.meaning as status,
+                                    r.robot_work_mode_id
+                                FROM robot r
+                                JOIN robot_status rs ON r.robot_status_id = rs.id
+                            ) t1
+                            JOIN robot_work_mode rwm ON t1.robot_work_mode_id = rwm.id
+                        ) tt1
+                        LEFT JOIN task t ON tt1.id = t.robot_id
+                    ) ttt1
+                    LEFT JOIN task_type tt ON ttt1.task_type_id = tt.id
+                    GROUP BY ttt1.robot_id
                     """
             robot_status_list = db.executeAndFetchAll(query)
             

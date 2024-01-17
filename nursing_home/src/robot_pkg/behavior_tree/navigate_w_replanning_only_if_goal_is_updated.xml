@@ -1,0 +1,22 @@
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery"><!-- 실패 시 6번 재시도 -->
+      <PipelineSequence name="NavigateNoReplanning"><!-- child가 running일 때 이전 children을 re-tick --><!-- 이게 성공이면 전체 성공 -->
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="FollowPath"/><!-- 길을 가는 게 성공일 경우 RecoveryNode도 성공-->
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/><!-- 길을 가는 게 실패할 경우 실행 -->
+        </RecoveryNode>
+      </PipelineSequence>
+      <ReactiveFallback name="RecoveryFallback"><!-- child 실패 시 restart -->
+        <RoundRobin name="RecoveryActions"><!-- children이 모두 실패하면 실패 -> 1) 1만큼 회전 시도 -> 2) 실패 시 0.05만큼 1의 속도로 물러남 -->
+          <Sequence name="ClearingActions">
+            <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </Sequence>
+          <Spin spin_dist="1"/>
+          <BackUp backup_dist="0.05" backup_speed="1"/>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

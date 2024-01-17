@@ -8,6 +8,11 @@ from interfaces_pkg.msg import TaskRequest, AstarMsg
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
+from ament_index_python.packages import get_package_share_directory
+import os
+
+bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_w_replanning_only_if_goal_is_updated.xml')
+
 
 class TaskSubscriber(Node):
     def __init__(self):
@@ -53,7 +58,7 @@ class GoPoseNode(Node):
             goal_pose.pose.orientation.z = astar_paths.poses[i].orientation.z
             goal_pose.pose.orientation.w = astar_paths.poses[i].orientation.w
             # paths.append(goal_pose)
-            self.navigator.goToPose(goal_pose)
+            self.navigator.goToPose(goal_pose, behavior_tree='')
 
 
             j = 0
