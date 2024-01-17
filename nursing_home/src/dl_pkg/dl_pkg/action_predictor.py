@@ -6,18 +6,25 @@ from torch.utils.data import Dataset, DataLoader
 import mediapipe as mp
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from std_msgs.msg import String
+from sensor_msgs.msg import CompressedImage
+from cv_bridge import CvBridge
+
 from models.action import ActionCam
 from models.action_lstm import ActionLSTM
 from ament_index_python.packages import get_package_share_directory
 
-TIMER_PERIOD = 0.1
+TIMER_PERIOD = 0.05
 
 class ActionPublisher(Node):
     def __init__(self):
             super().__init__(node_name='action_publisher')
+            self.bridge = CvBridge()
             self.publisher = self.create_publisher(String, '/action_rec' , 10)
+            self.img_publisher = self.create_publisher(CompressedImage, '/cctv_video', qos_profile_sensor_data)
             self.timer = self.create_timer(TIMER_PERIOD, self.action_timer_callback)
+            
             
             self.action_output_data = None
             self.action_output_frame = None
@@ -60,6 +67,9 @@ class ActionPublisher(Node):
 
             if ret:
                 img = img[:, :400, :]
+                cvt_img = self.bridge.cv2_to_compressed_imgmsg(img)
+                self.img_publisher.publish(cvt_img)
+                
 
                 action_output_frame, self.action_output_data = self.Action.predict(img)
 
