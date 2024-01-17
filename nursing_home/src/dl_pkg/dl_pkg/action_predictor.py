@@ -47,11 +47,7 @@ class ActionPublisher(Node):
             self.pose = self.mp_pose.Pose(static_image_mode=True, model_complexity=1, enable_segmentation=False, min_detection_confidence = 0.5)
 
             self.lstm = ActionLSTM(self.input_size, self.hidden_size, self.num_layers, self.action_num_class, self.device).to(self.device)
-            # self.lstm.load_state_dict(torch.load('/home/haneol/dev_ws/project/final_project/ros-repo-1/nursing_home/src/dl_pkg/dl_pkg/utils/action_state_dict.pt'))
-            # self.lstm = torch.load('/home/haneol/dev_ws/project/final_project/ros-repo-1/nursing_home/src/dl_pkg/dl_pkg/utils/best_action.pt')
             self.lstm.load_state_dict(torch.load(os.path.join(get_package_share_directory('dl_pkg'), 'models', 'action_state_dict.pt')))
-            # self.lstm = torch.load('best_action.pt')
-            # self.lstm.to(self.device)
             self.lstm.eval()
 
             self.Action = ActionCam(self.attention_dot, self.draw_line, self.length, self.pose, self.lstm, self.device)
@@ -67,7 +63,6 @@ class ActionPublisher(Node):
 
                 action_output_frame, self.action_output_data = self.Action.predict(img)
 
-                # if self.action_output_data == 'Collapsed':
                 msg.data = self.action_output_data
                 self.publisher.publish(msg)
 
@@ -75,12 +70,6 @@ class ActionPublisher(Node):
                 
                 cv2.imshow("Action Cam", action_output_frame)
                 cv2.waitKey(1)
-
-            
-        
-        # self.cap.release()
-        # cv2.destroyAllWindows()
-
 
 
 
