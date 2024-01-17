@@ -6,18 +6,25 @@ from torch.utils.data import Dataset, DataLoader
 import mediapipe as mp
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from std_msgs.msg import String
+from sensor_msgs.msg import CompressedImage
+from cv_bridge import CvBridge
+
 from models.action import ActionCam
 from models.action_lstm import ActionLSTM
 from ament_index_python.packages import get_package_share_directory
 
-TIMER_PERIOD = 0.1
+TIMER_PERIOD = 0.05
 
 class ActionPublisher(Node):
     def __init__(self):
             super().__init__(node_name='action_publisher')
+            self.bridge = CvBridge()
             self.publisher = self.create_publisher(String, '/action_rec' , 10)
+            self.img_publisher = self.create_publisher(CompressedImage, '/cctv_video', qos_profile_sensor_data)
             self.timer = self.create_timer(TIMER_PERIOD, self.action_timer_callback)
+            
             
             self.action_output_data = None
             self.action_output_frame = None
@@ -47,11 +54,7 @@ class ActionPublisher(Node):
             self.pose = self.mp_pose.Pose(static_image_mode=True, model_complexity=1, enable_segmentation=False, min_detection_confidence = 0.5)
 
             self.lstm = ActionLSTM(self.input_size, self.hidden_size, self.num_layers, self.action_num_class, self.device).to(self.device)
-            # self.lstm.load_state_dict(torch.load('/home/haneol/dev_ws/project/final_project/ros-repo-1/nursing_home/src/dl_pkg/dl_pkg/utils/action_state_dict.pt'))
-            # self.lstm = torch.load('/home/haneol/dev_ws/project/final_project/ros-repo-1/nursing_home/src/dl_pkg/dl_pkg/utils/best_action.pt')
             self.lstm.load_state_dict(torch.load(os.path.join(get_package_share_directory('dl_pkg'), 'models', 'action_state_dict.pt')))
-            # self.lstm = torch.load('best_action.pt')
-            # self.lstm.to(self.device)
             self.lstm.eval()
 
             self.Action = ActionCam(self.attention_dot, self.draw_line, self.length, self.pose, self.lstm, self.device)
@@ -64,24 +67,19 @@ class ActionPublisher(Node):
 
             if ret:
                 img = img[:, :400, :]
+                cvt_img = self.bridge.cv2_to_compressed_imgmsg(img)
+                self.img_publisher.publish(cvt_img)
+                
 
                 action_output_frame, self.action_output_data = self.Action.predict(img)
 
-                if self.action_output_data == 'Collapsed':
-                    msg.data = self.action_output_data
-                    self.publisher.publish(msg)
+                msg.data = self.action_output_data
+                self.publisher.publish(msg)
 
-                print(self.action_output_data) ####################
+                print(self.action_output_data)
                 
                 cv2.imshow("Action Cam", action_output_frame)
                 cv2.waitKey(1)
-
-            # else:
-            #     break
-        
-        # self.cap.release()
-        # cv2.destroyAllWindows()
-
 
 
 
