@@ -1,17 +1,21 @@
+from threading import Thread
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
+
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
-from rclpy.qos import qos_profile_sensor_data
-from threading import Thread
-
-from cv_bridge import CvBridge
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSProfile, qos_profile_sensor_data
 
 from interfaces_pkg.msg import *
 from std_msgs.msg import String
-from sensor_msgs.msg import CompressedImage, Image
+from sensor_msgs.msg import CompressedImage
+from geometry_msgs.msg import PoseWithCovarianceStamped 
+
+from cv_bridge import CvBridge
+
 from database.service_ui import DataManager
 
 from ament_index_python.packages import get_package_share_directory
@@ -24,6 +28,34 @@ import numpy as np
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
 from_class = uic.loadUiType(ui_file)[0]
+
+class AmclSubscriber(Node):
+
+    def __init__(self, ui):
+
+        super().__init__('amcl_subscriber')
+
+        self.ui = ui        
+        amcl_pose_qos = QoSProfile(
+                durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+                reliability=QoSReliabilityPolicy.RELIABLE,
+                history=QoSHistoryPolicy.KEEP_LAST,
+                depth=1)
+
+        self.amcl_subscriber = self.create_subscription(
+            PoseWithCovarianceStamped, 
+            '/amcl_pose', 
+            self.amcl_callback, 
+            amcl_pose_qos)
+    
+        self.now_x = 0
+        self.now_y = 0
+
+    def amcl_callback(self, amcl):
+        self.now_x = amcl.pose.pose.position.x
+        self.now_y = amcl.pose.pose.position.y
+        self.get_logger().info(f"{self.now_x}, {self.now_y}")
+
 
 class PiCamSubscriber(Node):
 
@@ -110,6 +142,7 @@ class CctvVideoSubscriber(Node):
 
 
 class RobotStatusSubscriber(Node):
+
     def __init__(self, ui):
         
         super().__init__('robot_status_subscriber')
@@ -138,6 +171,7 @@ class RobotStatusSubscriber(Node):
 
 
 class EmergencySubscriber(Node):
+
     def __init__(self, ui):
         super().__init__('emergency_status_subscriber')
         self.ui = ui
@@ -158,6 +192,7 @@ class EmergencySubscriber(Node):
 
 
 class TaskQueueSubscriber(Node):
+
     def __init__(self, ui):
         super().__init__('task_queue_subscriber')
         
@@ -200,6 +235,13 @@ class WindowClass(QMainWindow, from_class):
         pixmap = QPixmap('./src/main_pkg/map/home.pgm')
         self.map_label.setPixmap(pixmap.scaled(342,522, Qt.KeepAspectRatio))
         self.show()
+
+        # map label geometry:
+        # X: 10
+        # Y: 15
+        # Width: 342
+        # Height: 522
+
 
         # 토픽 발행하기
         self.count = 0
@@ -340,6 +382,9 @@ def main():
 
     cctv_video_subscriber = CctvVideoSubscriber(myWindows)
     executor.add_node(cctv_video_subscriber)
+
+    amcl_subscriber = AmclSubscriber(myWindows)
+    executor.add_node(amcl_subscriber)
 
     thread = Thread(target=executor.spin)
     thread.start()
