@@ -41,7 +41,7 @@ class TaskRequestSubscriber(Node):
 
 
     def task_request_callback(self, msg):
-        log.info('task_request subscribed')
+        # log.info('task_request subscribed')
         task_planner.add_task(msg)
 
 
