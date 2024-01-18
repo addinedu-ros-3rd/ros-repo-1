@@ -230,39 +230,39 @@ class TaskPublisher(Node):
         
         
     def task_timer_callback(self):
-        robot, item, q, robot_status_list = task_planner.give_robot_task()
+        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
+        log.info(("robot, item in task_timer_callback: ", task_planner.robot, task_planner.item))
         
-        if item is not None:
-        # if (task_planner.item != None) and (task_planner.robot == 1):
-            log.info(item.goal_point)
+        if task_planner.item is not None:
+            log.info(task_planner.item.goal_point)
             
             msg = TaskRequest()
             
-            x = item.goal_point.split(",")[0].replace("[", "")
+            x = task_planner.item.goal_point.split(",")[0].replace("[", "")
             log.info(x)
             
-            y = item.goal_point.split(",")[1]
+            y = task_planner.item.goal_point.split(",")[1]
             log.info(y)
             
-            z = item.goal_point.split(",")[2].replace("]", "")
+            z = task_planner.item.goal_point.split(",")[2].replace("]", "")
             log.info(z)
             
             msg.position.x = float(x)
             msg.position.y = float(y)
             msg.position.z = float(z)
             
-            if robot == 1:
+            if task_planner.robot == 1:
                 self.task_1_publisher.publish(msg)
-                item = None
-                robot = None
-            elif robot == 2:
+                task_planner.item = None
+                task_planner.robot = None
+            elif task_planner.robot == 2:
                 self.task_2_publisher.publish(msg)
-                item = None
-                robot = None
-            elif robot == 3:
+                task_planner.item = None
+                task_planner.robot = None
+            elif task_planner.robot == 3:
                 self.task_3_publisher.publish(msg)
-                item = None
-                robot = None
+                task_planner.item = None
+                task_planner.robot = None
         
         
 class TaskQueuePublisher(Node):

@@ -89,7 +89,7 @@ class PiCamSubscriber(Node):
 
         self.sub1 = self.create_subscription(
             CompressedImage,
-            'image_raw/compressed',
+            'image_raw/compressed_1',
             lambda data: self.listener_callback(data, self.ui.cam_r3_1),
             10)
 
@@ -135,7 +135,7 @@ class CctvVideoSubscriber(Node):
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
         height, width, channel = image_np.shape
-        self.get_logger().info(image_np.shape)
+        # self.get_logger().info(image_np.shape)
         bytes_per_line = 3 * width
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)

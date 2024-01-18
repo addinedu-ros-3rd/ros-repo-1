@@ -69,7 +69,7 @@ class TaskPlanning():
 
     def give_robot_task(self):
         # 로봇에 업무 추가 + 큐에서 삭제
-        while not self.q.empty():
+        if not self.q.empty():
             d = self.q.queue
             self.item = d[0]
             
@@ -78,9 +78,13 @@ class TaskPlanning():
             try:
                 self.robot = dm.select_waiting_robot()
                 
+                log.info(("self.robot : ", self.robot))
+                
                 if self.robot != 0:
                     dm.give_robot_task(self.robot, self.item)
                     self.q.get()
+                    
+                    log.info(self.q.qsize())
                     
                     return self.robot, self.item, self.q, self.robot_status_list
             
