@@ -48,6 +48,14 @@ class GoPoseNode(Node):
     def astarCallback(self, astar_paths):
         # self.navigator.waitUntilNav2Active()
 
+        if astar_paths.length < 1:
+            print("Invalid Paths")
+            msg = String()
+            msg.data = "REJECT"
+            self.done_publisher.publish(msg)
+            return
+
+
         i = 0
         while True:
             goal_pose = PoseStamped()
@@ -83,7 +91,7 @@ class GoPoseNode(Node):
                     )
 
                     # Some navigation timeout to demo cancellation
-                    if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
+                    if Duration.from_msg(feedback.navigation_time) > Duration(seconds=20.0):
                         self.navigator.cancelTask()
 
             # Do something depending on the return code
