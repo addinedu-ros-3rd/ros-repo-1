@@ -124,22 +124,24 @@ class RobotStatusPublisher(Node):
         
         task_planner.robot_status_list = task_planner.show_robot_status()
         
-        msg.robot1.id = task_planner.robot_status_list[0][0]
-        msg.robot1.status = task_planner.robot_status_list[0][1]
-        msg.robot1.task = task_planner.robot_status_list[0][2]
-        msg.robot1.goal = task_planner.robot_status_list[0][3]
+        if task_planner.robot_status_list != None:
         
-        msg.robot2.id = task_planner.robot_status_list[1][0]
-        msg.robot2.status = task_planner.robot_status_list[1][1]
-        msg.robot2.task = task_planner.robot_status_list[1][2]
-        msg.robot2.goal = task_planner.robot_status_list[1][3]
+            msg.robot1.id = task_planner.robot_status_list[0][0]
+            msg.robot1.status = task_planner.robot_status_list[0][1]
+            msg.robot1.task = task_planner.robot_status_list[0][2]
+            msg.robot1.goal = task_planner.robot_status_list[0][3]
+            
+            msg.robot2.id = task_planner.robot_status_list[1][0]
+            msg.robot2.status = task_planner.robot_status_list[1][1]
+            msg.robot2.task = task_planner.robot_status_list[1][2]
+            msg.robot2.goal = task_planner.robot_status_list[1][3]
+            
+            msg.robot3.id = task_planner.robot_status_list[2][0]
+            msg.robot3.status = task_planner.robot_status_list[2][1]
+            msg.robot3.task = task_planner.robot_status_list[2][2]
+            msg.robot3.goal = task_planner.robot_status_list[2][3]
         
-        msg.robot3.id = task_planner.robot_status_list[2][0]
-        msg.robot3.status = task_planner.robot_status_list[2][1]
-        msg.robot3.task = task_planner.robot_status_list[2][2]
-        msg.robot3.goal = task_planner.robot_status_list[2][3]
-        
-        self.publisher.publish(msg)
+            self.publisher.publish(msg)
         
         
 class TaskPublisher(Node):

@@ -62,23 +62,12 @@ class DataManager:
             log.error(f"select_task : {e}")
             
             
-    def update_task_robot_id(self, robot, task):
+    def give_robot_task(self, robot, task):
         try:
-            query = "UPDATE task SET robot_id = (%s), started_at = now() WHERE id = (%s)"
-            db.execute(query, (robot, task.id))
-            
+            db.callProc('give_robot_task', (robot, task.id))
+        
         except Exception as e:
-            log.error(f"update_task_robot_id : {e}")
-            
-            
-    def update_robot_working(self, robot):
-        try:
-            # 상태를 WORK로, 모드를 AUTO로 업데이트
-            query = "UPDATE robot SET robot_status_id = 3, robot_work_mode_id = 2 WHERE id = (%s)"
-            db.execute(query, (robot,))
-            
-        except Exception as e:
-            log.error(f"update_robot_status : {e}")
+            log.error(f" give_robot_task : {e}")
             
             
     def update_task_done(self, task_id):

@@ -32,7 +32,7 @@ class DB():
                 connection.commit()
 
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            print(f"execute Error: {err}")
             
         finally:
             if connection.is_connected():
@@ -54,7 +54,7 @@ class DB():
                 return result
 
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            print(f"executeAndFetchAll Error: {err}")
             
         finally:
             if connection.is_connected():
@@ -79,7 +79,25 @@ class DB():
                     return 0
 
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            print(f"executeAndFetchOne Error: {err}")
+            
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+                
+                
+    def callProc(self, proc_name, params):
+        connection = self.connection_pool.get_connection()
+
+        try:
+            if connection.is_connected():
+                cursor = connection.cursor(buffered=True)
+                cursor.callproc(proc_name, params)
+                connection.commit()
+
+        except mysql.connector.Error as err:
+            print(f"callProc Error: {err}")
             
         finally:
             if connection.is_connected():

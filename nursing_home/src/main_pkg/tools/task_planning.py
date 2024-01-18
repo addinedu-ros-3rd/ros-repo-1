@@ -51,8 +51,7 @@ class TaskPlanning():
         
         
     def task_start(self, robot, item):
-        dm.update_task_robot_id(robot, item)
-        dm.update_robot_working(robot)
+        dm.give_robot_task(robot, item)
         self.q.get()
     
     
