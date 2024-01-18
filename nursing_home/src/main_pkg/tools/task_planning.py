@@ -49,11 +49,6 @@ class TaskPlanning():
         self.q.queue = self.select_task()
             
         return self.q.queue
-        
-        
-    def task_start(self, robot, item):
-        dm.give_robot_task(robot, item)
-        self.q.get()
     
     
     def get_done(self, robot):
@@ -78,11 +73,14 @@ class TaskPlanning():
             d = self.q.queue
             self.item = d[0]
             
+            log.info(("self.item : ", self.item))
+            
             try:
                 self.robot = dm.select_waiting_robot()
                 
                 if self.robot != 0:
-                    self.task_start(self.robot, self.item)
+                    dm.give_robot_task(self.robot, self.item)
+                    self.q.get()
                     
                     return self.robot, self.item, self.q, self.robot_status_list
             

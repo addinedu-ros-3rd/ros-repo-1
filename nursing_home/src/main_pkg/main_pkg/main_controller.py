@@ -73,13 +73,88 @@ class AMCLSubscriber(Node):
         amcl_3 = msg
 
 
-class AStarPublisher(Node):
-    def __init__(self, robot) :
-        super().__init__('astar_publisher_' + str(robot))
+class AStarPublisher1(Node):
+    def __init__(self) :
+        super().__init__('astar_publisher_1')
 
-        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_' + str(robot), 10)
-        self.goal_subscriber = self.create_subscription(TaskRequest, '/task_' + str(robot), self.task_callback, 10)
+        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_1', 10)
+        self.goal_subscriber = self.create_subscription(TaskRequest, '/task_1', self.task_callback, 10)
+        self.astar_planner = AStarPlanner(resolution=0.7, rr=0.4, padding=4)
+            
 
+    def task_callback(self, msg):
+        self.now_x = amcl_1.pose.pose.position.x
+        self.now_y = amcl_1.pose.pose.position.y
+
+        pose_stamp = PoseWithCovarianceStamped()
+        pose_stamp.header.frame_id = 'map'
+
+        rx, ry, tpx, tpy, tvec_x, tvec_y = self.astar_planner.planning(self.now_x, self.now_y, msg.position.x, msg.position.y)
+
+        astar_paths = []
+        astar_paths_msg = AstarMsg()
+        astar_paths_msg.length = len(tpx)
+
+        for i in range(len(tpx)):
+            tmp = Pose()
+            tmp.position.x = tpx[i]
+            tmp.position.y = tpy[i]
+
+            q = quaternion_from_euler(0, 0, math.atan2(tvec_y[i], tvec_x[i]), 'rxyz')
+            tmp.orientation.z = q[2]
+            tmp.orientation.w = q[3]
+
+            astar_paths.append(tmp)
+
+        astar_paths_msg.poses = astar_paths
+
+        self.astar_publisher.publish(astar_paths_msg)
+        
+        
+class AStarPublisher2(Node):
+    def __init__(self) :
+        super().__init__('astar_publisher_2')
+
+        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_2', 10)
+        self.goal_subscriber = self.create_subscription(TaskRequest, '/task_2', self.task_callback, 10)
+        self.astar_planner = AStarPlanner(resolution=0.7, rr=0.4, padding=4)
+            
+
+    def task_callback(self, msg):
+        self.now_x = amcl_1.pose.pose.position.x
+        self.now_y = amcl_1.pose.pose.position.y
+
+        pose_stamp = PoseWithCovarianceStamped()
+        pose_stamp.header.frame_id = 'map'
+
+        rx, ry, tpx, tpy, tvec_x, tvec_y = self.astar_planner.planning(self.now_x, self.now_y, msg.position.x, msg.position.y)
+
+        astar_paths = []
+        astar_paths_msg = AstarMsg()
+        astar_paths_msg.length = len(tpx)
+
+        for i in range(len(tpx)):
+            tmp = Pose()
+            tmp.position.x = tpx[i]
+            tmp.position.y = tpy[i]
+
+            q = quaternion_from_euler(0, 0, math.atan2(tvec_y[i], tvec_x[i]), 'rxyz')
+            tmp.orientation.z = q[2]
+            tmp.orientation.w = q[3]
+
+            astar_paths.append(tmp)
+
+        astar_paths_msg.poses = astar_paths
+
+        self.astar_publisher.publish(astar_paths_msg)
+        
+        
+class AStarPublisher3(Node):
+    def __init__(self) :
+        super().__init__('astar_publisher_3')
+
+        self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_3', 10)
+        self.goal_subscriber = self.create_subscription(TaskRequest, '/task_3', self.task_callback, 10)
         self.astar_planner = AStarPlanner(resolution=0.7, rr=0.4, padding=4)
             
 
@@ -125,7 +200,7 @@ class RobotStatusPublisher(Node):
         
         task_planner.robot_status_list = task_planner.show_robot_status()
         
-        if task_planner.robot_status_list != None:
+        if task_planner.robot_status_list is not None:
         
             msg.robot1.id = task_planner.robot_status_list[0][0]
             msg.robot1.status = task_planner.robot_status_list[0][1]
@@ -146,38 +221,48 @@ class RobotStatusPublisher(Node):
         
         
 class TaskPublisher(Node):
-    def __init__(self, robot):
-        super().__init__("task_publisher_" + str(robot))
-        self.publisher = self.create_publisher(TaskRequest, "/task_" + str(robot), 10)
+    def __init__(self):
+        super().__init__("task_publisher_1")
+        self.task_1_publisher = self.create_publisher(TaskRequest, "/task_1", 10)
+        self.task_2_publisher = self.create_publisher(TaskRequest, "/task_2", 10)
+        self.task_3_publisher = self.create_publisher(TaskRequest, "/task_3", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.task_timer_callback)
         
         
     def task_timer_callback(self):
-        task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
+        robot, item, q, robot_status_list = task_planner.give_robot_task()
         
-        if task_planner.item != None:
+        if item is not None:
         # if (task_planner.item != None) and (task_planner.robot == 1):
-            log.info(task_planner.item.goal_point)
+            log.info(item.goal_point)
             
             msg = TaskRequest()
             
-            x = task_planner.item.goal_point.split(",")[0].replace("[", "")
+            x = item.goal_point.split(",")[0].replace("[", "")
             log.info(x)
             
-            y = task_planner.item.goal_point.split(",")[1]
+            y = item.goal_point.split(",")[1]
             log.info(y)
             
-            z = task_planner.item.goal_point.split(",")[2].replace("]", "")
+            z = item.goal_point.split(",")[2].replace("]", "")
             log.info(z)
             
             msg.position.x = float(x)
             msg.position.y = float(y)
             msg.position.z = float(z)
             
-            # path planning을 여기에서 해야 할 것 같다
-            
-            self.publisher.publish(msg)
-            task_planner.item = None
+            if robot == 1:
+                self.task_1_publisher.publish(msg)
+                item = None
+                robot = None
+            elif robot == 2:
+                self.task_2_publisher.publish(msg)
+                item = None
+                robot = None
+            elif robot == 3:
+                self.task_3_publisher.publish(msg)
+                item = None
+                robot = None
         
         
 class TaskQueuePublisher(Node):
@@ -206,23 +291,30 @@ class TaskQueuePublisher(Node):
             log.info(v)
             
         self.publisher.publish(msg)
-        
-        
-class DoneTaskSubscriber1(Node):
-    def __init__(self):
-        super().__init__('done_task_subscriber_1')
-        self.subscription = self.create_subscription(
-            String,
-            'done_task_1',
-            self.listener_callback,
-            10)
 
-    def listener_callback(self, msg):
-        log.info("done_task_1 : " + msg.data)
+
+class DoneTaskSubscriber(Node):
+    def __init__(self):
+        super().__init__('done_task_subscriber')
         
+        self.done_task_1 = self.create_subscription(String, '/done_task_1', self.done_task_callback_1, 10)
+        self.done_task_2 = self.create_subscription(String, '/done_task_2', self.done_task_callback_2, 10)
+        self.done_task_3 = self.create_subscription(String, '/done_task_3', self.done_task_callback_3, 10)
+
+    def done_task_callback_1(self, msg):
         if msg.data == 'OK':
             task_planner = TaskPlanning()
             task_planner.get_done(1)
+
+    def done_task_callback_2(self, msg):
+        if msg.data == 'OK':
+            task_planner = TaskPlanning()
+            task_planner.get_done(2)
+
+    def done_task_callback_3(self, msg):
+        if msg.data == 'OK':
+            task_planner = TaskPlanning()
+            task_planner.get_done(3)
 
 
 def main():
@@ -232,26 +324,23 @@ def main():
     task_request_subscriber = TaskRequestSubscriber()  # UI에서 요청 받음
     task_queue_publisher = TaskQueuePublisher()  # UI로 로봇 할당 안된 업무 목록 보내기
     robot_status_publisher = RobotStatusPublisher()  # UI로 로봇 상태 보내기
-    task_publisher_1 = TaskPublisher(robot=1)  # 로봇 1에 좌표 보내기
-    task_publisher_2 = TaskPublisher(robot=2)
-    task_publisher_3 = TaskPublisher(robot=3)
-    amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
-    astar_publisher_1 = AStarPublisher(robot=1)  # 로봇 이동 경로 publish
-    astar_publisher_2 = AStarPublisher(robot=2)
-    astar_publisher_3 = AStarPublisher(robot=3)
-    done_task_1 = DoneTaskSubscriber1()  # 로봇 1에서 업무완료여부 받기
     
-    executor.add_node(task_request_subscriber)
-    executor.add_node(task_queue_publisher)
-    executor.add_node(robot_status_publisher)
-    executor.add_node(task_publisher_1)
-    executor.add_node(task_publisher_2)
-    executor.add_node(task_publisher_3)
-    executor.add_node(amcl_subscriber)
+    task_publisher = TaskPublisher()  # 로봇에 좌표 보내기
+    astar_publisher_1 = AStarPublisher1()  # 로봇 이동 경로 publish
+    astar_publisher_2 = AStarPublisher2()
+    astar_publisher_3 = AStarPublisher3()
+    executor.add_node(task_publisher)
     executor.add_node(astar_publisher_1)
     executor.add_node(astar_publisher_2)
     executor.add_node(astar_publisher_3)
-    executor.add_node(done_task_1)
+        
+    amcl_subscriber = AMCLSubscriber()  # 로봇들 amcl_pose 갱신
+    done_task_subscriber = DoneTaskSubscriber()  # 로봇에서 업무완료여부 받기
+    executor.add_node(amcl_subscriber)
+    executor.add_node(task_request_subscriber)
+    executor.add_node(task_queue_publisher)
+    executor.add_node(robot_status_publisher)
+    executor.add_node(done_task_subscriber)
     
     executor.spin()
     
