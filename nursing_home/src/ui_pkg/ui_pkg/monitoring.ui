@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1419</width>
-    <height>639</height>
+    <width>1476</width>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
   <widget class="QPushButton" name="dark_btn">
    <property name="geometry">
     <rect>
-     <x>1358</x>
+     <x>1418</x>
      <y>50</y>
      <width>41</width>
      <height>25</height>
@@ -38,7 +38,7 @@
   <widget class="QPushButton" name="white_btn">
    <property name="geometry">
     <rect>
-     <x>1320</x>
+     <x>1380</x>
      <y>50</y>
      <width>41</width>
      <height>25</height>
@@ -145,10 +145,10 @@
   <widget class="QGroupBox" name="cam_group">
    <property name="geometry">
     <rect>
-     <x>380</x>
+     <x>410</x>
      <y>80</y>
-     <width>591</width>
-     <height>161</height>
+     <width>621</width>
+     <height>191</height>
     </rect>
    </property>
    <property name="title">
@@ -160,10 +160,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>408</x>
       <y>15</y>
-      <width>191</width>
-      <height>131</height>
+      <width>200</width>
+      <height>165</height>
      </rect>
     </property>
     <property name="font">
@@ -184,10 +184,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>209</x>
       <y>15</y>
-      <width>191</width>
-      <height>131</height>
+      <width>200</width>
+      <height>165</height>
      </rect>
     </property>
     <property name="font">
@@ -210,8 +210,8 @@
      <rect>
       <x>10</x>
       <y>15</y>
-      <width>191</width>
-      <height>131</height>
+      <width>200</width>
+      <height>165</height>
      </rect>
     </property>
     <property name="font">
@@ -230,9 +230,9 @@
   <widget class="QGroupBox" name="request_group">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>296</y>
-     <width>591</width>
+     <x>410</x>
+     <y>310</y>
+     <width>621</width>
      <height>291</height>
     </rect>
    </property>
@@ -242,7 +242,7 @@
    <widget class="QTableWidget" name="task_queue">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>40</y>
       <width>221</width>
       <height>192</height>
@@ -262,7 +262,7 @@
    <widget class="QComboBox" name="task_combo">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>140</x>
       <y>250</y>
       <width>91</width>
       <height>25</height>
@@ -272,7 +272,7 @@
    <widget class="QComboBox" name="location_combo">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>260</x>
       <y>250</y>
       <width>91</width>
       <height>25</height>
@@ -282,7 +282,7 @@
    <widget class="QPushButton" name="serve_btn">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>140</x>
       <y>170</y>
       <width>91</width>
       <height>25</height>
@@ -295,7 +295,7 @@
    <widget class="QPushButton" name="normal_mode">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>30</x>
       <y>240</y>
       <width>89</width>
       <height>41</height>
@@ -308,7 +308,7 @@
    <widget class="QPushButton" name="serve_stop">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>500</x>
       <y>250</y>
       <width>91</width>
       <height>25</height>
@@ -324,7 +324,7 @@
    <widget class="QTableWidget" name="robot_table">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>30</x>
       <y>15</y>
       <width>325</width>
       <height>113</height>
@@ -375,7 +375,7 @@
    <widget class="QPushButton" name="call_btn">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>250</y>
       <width>91</width>
       <height>25</height>
@@ -388,7 +388,7 @@
    <widget class="QPushButton" name="serve_mode">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>30</x>
       <y>160</y>
       <width>89</width>
       <height>41</height>
@@ -401,7 +401,7 @@
    <widget class="QLabel" name="queue_label">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>20</y>
       <width>91</width>
       <height>17</height>
@@ -428,7 +428,7 @@
   <widget class="QLabel" name="title_label">
    <property name="geometry">
     <rect>
-     <x>570</x>
+     <x>580</x>
      <y>10</y>
      <width>241</width>
      <height>31</height>
@@ -451,7 +451,7 @@
   <widget class="QLabel" name="cctv_label">
    <property name="geometry">
     <rect>
-     <x>980</x>
+     <x>1040</x>
      <y>60</y>
      <width>181</width>
      <height>20</height>
@@ -466,8 +466,8 @@
     <rect>
      <x>10</x>
      <y>80</y>
-     <width>363</width>
-     <height>549</height>
+     <width>391</width>
+     <height>524</height>
     </rect>
    </property>
    <property name="title">
@@ -481,8 +481,8 @@
      <rect>
       <x>10</x>
       <y>15</y>
-      <width>342</width>
-      <height>522</height>
+      <width>372</width>
+      <height>498</height>
      </rect>
     </property>
     <property name="font">
@@ -501,10 +501,10 @@
   <widget class="QGroupBox" name="cctv_group">
    <property name="geometry">
     <rect>
-     <x>980</x>
+     <x>1040</x>
      <y>80</y>
      <width>421</width>
-     <height>508</height>
+     <height>521</height>
     </rect>
    </property>
    <property name="title">
@@ -517,7 +517,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>15</y>
+      <y>20</y>
       <width>400</width>
       <height>480</height>
      </rect>
@@ -538,7 +538,7 @@
   <widget class="QLabel" name="view_label">
    <property name="geometry">
     <rect>
-     <x>380</x>
+     <x>410</x>
      <y>60</y>
      <width>181</width>
      <height>20</height>
@@ -557,8 +557,8 @@
   <widget class="QLabel" name="task_label">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>275</y>
+     <x>410</x>
+     <y>290</y>
      <width>181</width>
      <height>20</height>
     </rect>

@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
 
+import rclpy as rp
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSProfile, qos_profile_sensor_data
@@ -20,11 +21,10 @@ from database.service_ui import DataManager
 
 from ament_index_python.packages import get_package_share_directory
 
-import sys
-import rclpy as rp
-import os
-import cv2
 import numpy as np
+import cv2
+import sys
+import os
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
 from_class = uic.loadUiType(ui_file)[0]
@@ -34,60 +34,62 @@ class AmclSubscriber(Node):
     def __init__(self, ui):
 
         super().__init__('amcl_subscriber')
-
         self.ui = ui        
 
-        # 맵 표시하기
-        # map label geometry:
-        # X: 10
-        # Y: 15
-        # Width: 342
-        # Height: 522
         self.pixmap = QPixmap('./src/main_pkg/map/home.pgm')
         self.height = self.pixmap.size().height()
         self.width = self.pixmap.size().width()
         self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
-        self.ui.map_label.setPixmap(self.pixmap.scaled(342,522, Qt.KeepAspectRatio))
-        # self.show()
-
-
+        self.ui.map_label.setPixmap(self.pixmap.scaled(372, 498, Qt.KeepAspectRatio))
+  
         amcl_pose_qos = QoSProfile(
                 durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
                 reliability=QoSReliabilityPolicy.RELIABLE,
                 history=QoSHistoryPolicy.KEEP_LAST,
                 depth=1)
-
-        self.amcl_subscriber = self.create_subscription(
+        
+        # 3개의 로봇이 전부 표시되어야 함
+        self.pose1 = self.create_subscription(
             PoseWithCovarianceStamped, 
-            '/amcl_pose', 
-            self.amcl_callback, 
+            '/amcl_pose_1', 
+            self.amcl_callback1, 
+            amcl_pose_qos)
+        self.create_timer(self)
+        
+        self.pose2 = self.create_subscription(
+            PoseWithCovarianceStamped, 
+            '/amcl_pose_2', 
+            self.amcl_callback1, 
+            amcl_pose_qos)
+        
+        self.pose3 = self.create_subscription(
+            PoseWithCovarianceStamped, 
+            '/amcl_pose_3', 
+            self.amcl_callback1, 
             amcl_pose_qos)
     
         self.now_x = 0
         self.now_y = 0
 
         self.map_resolution = 0.05
-        self.map_origin = (-0.629, -2.92)
+        self.map_origin = (-0.315, -2.76)
 
         self.painter = QPainter(self.ui.map_label.pixmap())
         self.painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
 
 
-    def amcl_callback(self, amcl):
+    def amcl_callback1(self, amcl):
         self.now_x = amcl.pose.pose.position.x
         self.now_y = amcl.pose.pose.position.y
         self.get_logger().info(f"{self.now_x}, {self.now_y}")
 
         x, y = self.calc_grid_position(self.now_x, self.now_y)
 
-        # 맵 표시하기
-        # pixmap = QPixmap('./src/main_pkg/map/home.pgm')
-        self.ui.map_label.setPixmap(self.pixmap.scaled(342,522, Qt.KeepAspectRatio))
+        self.ui.map_label.setPixmap(self.pixmap.scaled(372,498, Qt.KeepAspectRatio))
         painter = QPainter(self.ui.map_label.pixmap())
         painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
         painter.drawPoint(int((self.width - x)* 6), int(y * 6))
         painter.end
-
 
     def calc_grid_position(self, x, y):
         pos_x = (x - self.map_origin[0]) / self.map_resolution
@@ -100,28 +102,27 @@ class PiCamSubscriber(Node):
     def __init__(self, ui):
 
         super().__init__('pi_cam_subscriber')
-
         self.ui = ui
 
         self.sub1 = self.create_subscription(
             CompressedImage,
-            'image_raw/compressed_1',
-            self.listener_callback1,
+            'image_raw/compressed',
+            lambda data: self.listener_callback(data, self.ui.cam_r3_1),
             10)
-        
+
         self.sub2 = self.create_subscription(
             CompressedImage,
             'image_raw/compressed_2',
-            self.listener_callback2,
+            lambda data: self.listener_callback(data, self.ui.cam_r3_2),
             10)
-        
+
         self.sub3 = self.create_subscription(
             CompressedImage,
             'image_raw/compressed_3',
-            self.listener_callback3,
+            lambda data: self.listener_callback(data, self.ui.cam_r3_3),
             10)
 
-    def listener_callback1(self, data):
+    def listener_callback(self, data, label_widget):
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
@@ -129,36 +130,15 @@ class PiCamSubscriber(Node):
         bytes_per_line = 3 * width
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
-        self.ui.cam_r3_1.setPixmap(pixmap)
-        
-    def listener_callback2(self, data):
-        np_arr = np.frombuffer(data.data, np.uint8)
-        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-        height, width, channel = image_np.shape
-        bytes_per_line = 3 * width
-        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(q_image)
-        self.ui.cam_r3_2.setPixmap(pixmap)
-        
-    def listener_callback3(self, data):
-        np_arr = np.frombuffer(data.data, np.uint8)
-        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-        height, width, channel = image_np.shape
-        bytes_per_line = 3 * width
-        q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(q_image)
-        self.ui.cam_r3_3.setPixmap(pixmap)
-
+        label_widget.setPixmap(pixmap)
 
 class CctvVideoSubscriber(Node):
     
     def __init__(self, ui):
 
         super().__init__('cctv_video_subscriber')
-        
         self.ui = ui
+
         self.subscription = self.create_subscription(
             CompressedImage,
             'cctv_video',
@@ -171,7 +151,6 @@ class CctvVideoSubscriber(Node):
         np_arr = np.frombuffer(msg.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-        
         height, width, channel = image_np.shape
         self.get_logger().info(image_np.shape)
         bytes_per_line = 3 * width
@@ -256,7 +235,6 @@ class TaskQueueSubscriber(Node):
                     
                     self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
                     self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
-            
 
 class WindowClass(QMainWindow, from_class):
 
@@ -269,7 +247,6 @@ class WindowClass(QMainWindow, from_class):
         timer = QTimer(self)
         timer.timeout.connect(self.time)
         timer.start(1000)
-
 
         # 토픽 발행하기
         self.count = 0
@@ -306,8 +283,8 @@ class WindowClass(QMainWindow, from_class):
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
-            
         
+    
     def set_combo(self):
         task_type_list = self.dm.select_all_task_type()
         for item in task_type_list:
