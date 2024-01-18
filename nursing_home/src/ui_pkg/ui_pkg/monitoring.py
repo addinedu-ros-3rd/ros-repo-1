@@ -27,13 +27,13 @@ import sys
 import os
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
+map_file = os.path.join(get_package_share_directory('main_pkg'), 'map', 'home.pgm')
 from_class = uic.loadUiType(ui_file)[0]
 
 global amcl_1, amcl_2, amcl_3
 amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
 amcl_3 = PoseWithCovarianceStamped()
-
 
 class AmclSubscriber(Node):
 
@@ -66,7 +66,6 @@ class AmclSubscriber(Node):
             self.amcl_callback3, 
             amcl_pose_qos)
 
-
     def amcl_callback1(self, amcl):
         global amcl_1
         amcl_1 = amcl
@@ -76,9 +75,6 @@ class AmclSubscriber(Node):
     def amcl_callback3(self, amcl):
         global amcl_3
         amcl_3 = amcl
-
-
-
 
 class PiCamSubscriber(Node):
 
@@ -268,13 +264,13 @@ class WindowClass(QMainWindow, from_class):
         self.dm = DataManager()
         self.set_combo()
 
-
         # map 관련
-        self.pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.pixmap = QPixmap(map_file)
         self.height = self.pixmap.size().height()
         self.width = self.pixmap.size().width()
+        self.image_scale = 6
         self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
-        self.map_label.setPixmap(self.pixmap.scaled(372, 498, Qt.KeepAspectRatio))
+        self.map_label.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
     
         self.now_x = 0
         self.now_y = 0
@@ -283,24 +279,33 @@ class WindowClass(QMainWindow, from_class):
         self.map_origin = (-0.315, -2.76)
         
     def updateMap(self):
-        self.map_label.setPixmap(self.pixmap.scaled(372,498, Qt.KeepAspectRatio))
+        self.map_label.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
 
         painter = QPainter(self.map_label.pixmap())
 
         x, y = self.calc_grid_position(amcl_1.pose.pose.position.x, amcl_1.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
-
+        self.font = QFont()
+        self.font.setBold(True)
+        self.font.setPointSize(15)
+        painter.setFont(self.font)
+        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '1')
+        
+        #-------------
         x, y = self.calc_grid_position(amcl_2.pose.pose.position.x, amcl_2.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.blue, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '2')
 
+        #-------------
         x, y = self.calc_grid_position(amcl_3.pose.pose.position.x, amcl_3.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.green, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '3')
 
         painter.end
 

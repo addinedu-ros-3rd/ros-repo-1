@@ -160,7 +160,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>408</x>
+      <x>410</x>
       <y>15</y>
       <width>200</width>
       <height>165</height>
@@ -184,7 +184,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>209</x>
+      <x>211</x>
       <y>15</y>
       <width>200</width>
       <height>165</height>
@@ -208,7 +208,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>12</x>
       <y>15</y>
       <width>200</width>
       <height>165</height>
@@ -242,8 +242,8 @@
    <widget class="QTableWidget" name="task_queue">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>40</y>
+      <x>389</x>
+      <y>30</y>
       <width>221</width>
       <height>192</height>
      </rect>
@@ -262,8 +262,8 @@
    <widget class="QComboBox" name="task_combo">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>250</y>
+      <x>130</x>
+      <y>240</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -272,8 +272,8 @@
    <widget class="QComboBox" name="location_combo">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>250</y>
+      <x>250</x>
+      <y>240</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -282,7 +282,7 @@
    <widget class="QPushButton" name="serve_btn">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>130</x>
       <y>170</y>
       <width>91</width>
       <height>25</height>
@@ -295,8 +295,8 @@
    <widget class="QPushButton" name="normal_mode">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>240</y>
+      <x>20</x>
+      <y>230</y>
       <width>89</width>
       <height>41</height>
      </rect>
@@ -308,8 +308,8 @@
    <widget class="QPushButton" name="serve_stop">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>250</y>
+      <x>490</x>
+      <y>240</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -324,8 +324,8 @@
    <widget class="QTableWidget" name="robot_table">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>15</y>
+      <x>20</x>
+      <y>20</y>
       <width>325</width>
       <height>113</height>
      </rect>
@@ -375,8 +375,8 @@
    <widget class="QPushButton" name="call_btn">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>250</y>
+      <x>370</x>
+      <y>240</y>
       <width>91</width>
       <height>25</height>
      </rect>
@@ -388,7 +388,7 @@
    <widget class="QPushButton" name="serve_mode">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>160</y>
       <width>89</width>
       <height>41</height>
@@ -401,8 +401,8 @@
    <widget class="QLabel" name="queue_label">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>20</y>
+      <x>390</x>
+      <y>10</y>
       <width>91</width>
       <height>17</height>
      </rect>
@@ -428,7 +428,7 @@
   <widget class="QLabel" name="title_label">
    <property name="geometry">
     <rect>
-     <x>580</x>
+     <x>610</x>
      <y>10</y>
      <width>241</width>
      <height>31</height>
@@ -504,7 +504,7 @@
      <x>1040</x>
      <y>80</y>
      <width>421</width>
-     <height>521</height>
+     <height>524</height>
     </rect>
    </property>
    <property name="title">
@@ -517,9 +517,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
+      <y>15</y>
       <width>400</width>
-      <height>480</height>
+      <height>498</height>
      </rect>
     </property>
     <property name="font">
