@@ -80,7 +80,7 @@ class AStarPublisher(Node):
         self.astar_publisher = self.create_publisher(AstarMsg, '/astar_paths_' + str(robot), 10)
         self.goal_subscriber = self.create_subscription(TaskRequest, '/task_' + str(robot), self.task_callback, 10)
 
-        self.astar_planner = AStarPlanner(resolution=0.7, rr=0.3, padding=5)
+        self.astar_planner = AStarPlanner(resolution=0.7, rr=0.4, padding=4)
             
 
     def task_callback(self, msg):

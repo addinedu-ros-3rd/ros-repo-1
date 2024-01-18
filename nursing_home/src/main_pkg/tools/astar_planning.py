@@ -38,11 +38,9 @@ class AStarPlanner:
         self.motion = self.get_motion_model()
 
         # custom parameters
+        self.resolution = 1
         self.map_resolution = 1
         self.map_origin = (0, 0)
-
-
-        self.resolution = self.map_resolution
         
         ox, oy = self.load_map()
 

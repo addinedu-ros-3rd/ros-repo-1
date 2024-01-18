@@ -29,18 +29,17 @@ import os
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
 from_class = uic.loadUiType(ui_file)[0]
 
+global amcl_1, amcl_2, amcl_3
+amcl_1 = PoseWithCovarianceStamped()
+amcl_2 = PoseWithCovarianceStamped()
+amcl_3 = PoseWithCovarianceStamped()
+
+
 class AmclSubscriber(Node):
 
-    def __init__(self, ui):
+    def __init__(self):
 
         super().__init__('amcl_subscriber')
-        self.ui = ui        
-
-        self.pixmap = QPixmap('./src/main_pkg/map/home.pgm')
-        self.height = self.pixmap.size().height()
-        self.width = self.pixmap.size().width()
-        self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
-        self.ui.map_label.setPixmap(self.pixmap.scaled(372, 498, Qt.KeepAspectRatio))
   
         amcl_pose_qos = QoSProfile(
                 durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
@@ -54,47 +53,31 @@ class AmclSubscriber(Node):
             '/amcl_pose_1', 
             self.amcl_callback1, 
             amcl_pose_qos)
-        self.create_timer(self)
         
         self.pose2 = self.create_subscription(
             PoseWithCovarianceStamped, 
             '/amcl_pose_2', 
-            self.amcl_callback1, 
+            self.amcl_callback2, 
             amcl_pose_qos)
         
         self.pose3 = self.create_subscription(
             PoseWithCovarianceStamped, 
             '/amcl_pose_3', 
-            self.amcl_callback1, 
+            self.amcl_callback3, 
             amcl_pose_qos)
-    
-        self.now_x = 0
-        self.now_y = 0
-
-        self.map_resolution = 0.05
-        self.map_origin = (-0.315, -2.76)
-
-        self.painter = QPainter(self.ui.map_label.pixmap())
-        self.painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
 
 
     def amcl_callback1(self, amcl):
-        self.now_x = amcl.pose.pose.position.x
-        self.now_y = amcl.pose.pose.position.y
-        self.get_logger().info(f"{self.now_x}, {self.now_y}")
+        global amcl_1
+        amcl_1 = amcl
+    def amcl_callback2(self, amcl):
+        global amcl_2
+        amcl_2 = amcl
+    def amcl_callback3(self, amcl):
+        global amcl_3
+        amcl_3 = amcl
 
-        x, y = self.calc_grid_position(self.now_x, self.now_y)
 
-        self.ui.map_label.setPixmap(self.pixmap.scaled(372,498, Qt.KeepAspectRatio))
-        painter = QPainter(self.ui.map_label.pixmap())
-        painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
-        painter.end
-
-    def calc_grid_position(self, x, y):
-        pos_x = (x - self.map_origin[0]) / self.map_resolution
-        pos_y = (y - self.map_origin[1]) / self.map_resolution
-        return pos_x, pos_y
 
 
 class PiCamSubscriber(Node):
@@ -246,7 +229,8 @@ class WindowClass(QMainWindow, from_class):
         # 시간 표시하기     
         timer = QTimer(self)
         timer.timeout.connect(self.time)
-        timer.start(1000)
+        timer.timeout.connect(self.updateMap)
+        timer.start(200)
 
         # 토픽 발행하기
         self.count = 0
@@ -283,7 +267,48 @@ class WindowClass(QMainWindow, from_class):
         # DB에서 콤보박스 가져오기
         self.dm = DataManager()
         self.set_combo()
+
+
+        # map 관련
+        self.pixmap = QPixmap('./src/main_pkg/map/home.pgm')
+        self.height = self.pixmap.size().height()
+        self.width = self.pixmap.size().width()
+        self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
+        self.map_label.setPixmap(self.pixmap.scaled(372, 498, Qt.KeepAspectRatio))
+    
+        self.now_x = 0
+        self.now_y = 0
+
+        self.map_resolution = 0.05
+        self.map_origin = (-0.315, -2.76)
         
+    def updateMap(self):
+        self.map_label.setPixmap(self.pixmap.scaled(372,498, Qt.KeepAspectRatio))
+
+        painter = QPainter(self.map_label.pixmap())
+
+        x, y = self.calc_grid_position(amcl_1.pose.pose.position.x, amcl_1.pose.pose.position.y)
+
+        painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
+        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+
+        x, y = self.calc_grid_position(amcl_2.pose.pose.position.x, amcl_2.pose.pose.position.y)
+
+        painter.setPen(QPen(Qt.blue, 20, Qt.SolidLine))
+        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+
+        x, y = self.calc_grid_position(amcl_3.pose.pose.position.x, amcl_3.pose.pose.position.y)
+
+        painter.setPen(QPen(Qt.green, 20, Qt.SolidLine))
+        painter.drawPoint(int((self.width - x)* 6), int(y * 6))
+
+        painter.end
+
+    def calc_grid_position(self, x, y):
+        pos_x = (x - self.map_origin[0]) / self.map_resolution
+        pos_y = (y - self.map_origin[1]) / self.map_resolution
+        return pos_x, pos_y
+    
     
     def set_combo(self):
         task_type_list = self.dm.select_all_task_type()
@@ -389,7 +414,7 @@ def main():
     cctv_video_subscriber = CctvVideoSubscriber(myWindows)
     executor.add_node(cctv_video_subscriber)
 
-    amcl_subscriber = AmclSubscriber(myWindows)
+    amcl_subscriber = AmclSubscriber()
     executor.add_node(amcl_subscriber)
 
     thread = Thread(target=executor.spin)
