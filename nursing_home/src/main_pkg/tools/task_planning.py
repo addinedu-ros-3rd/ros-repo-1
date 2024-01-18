@@ -16,19 +16,9 @@ class TaskPlanning():
         self.robot = None
         self.item = None
         self.robot_status_list = dm.select_all_robot_status()
-    
-    
-    def add_task(self, req=None):
         
-        # todo: ui 실행 후 태스크 큐 하나 추가 후 다음부터 req를 못 받음
-        # log.info(req)
         
-        if req != None:
-            t1 = Task(task_type_id = req.task_type_id,
-                      goal_point = [req.position.x, req.position.y, req.position.z],
-                      place = req.place)
-            dm.insert_task(t1)
-
+    def select_task(self):
         # DB task 테이블에 현재 들어있는 값 가져오기
         task_list = dm.select_task_not_started()
         
@@ -46,8 +36,19 @@ class TaskPlanning():
             for task in task_list:
                 if task[0] not in id_list:
                     self.q.put(Task(id = task[0], task_type_id = task[1], goal_point = task[2], task_type = task[3], place = task[4]))
+                    
+        return self.q.queue
+    
+    
+    def add_task(self, req):        
+        task = Task(task_type_id = req.task_type_id,
+                    goal_point = [req.position.x, req.position.y, req.position.z],
+                    place = req.place)
+        dm.insert_task(task)
+        
+        self.q.queue = self.select_task()
             
-        return self.q
+        return self.q.queue
         
         
     def task_start(self, robot, item):

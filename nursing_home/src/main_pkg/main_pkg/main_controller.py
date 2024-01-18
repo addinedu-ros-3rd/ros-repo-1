@@ -37,10 +37,11 @@ class TaskRequestSubscriber(Node):
             TaskRequest,
             "task_request",
             self.task_request_callback,
-            10)
+            1)
 
 
     def task_request_callback(self, msg):
+        log.info('task_request subscribed')
         task_planner.add_task(msg)
 
 
@@ -188,16 +189,14 @@ class TaskQueuePublisher(Node):
     def task_queue_timer_callback(self):
         msg = TaskQueue()
         
-        task_planner.q = task_planner.add_task()
-        
-        # log.info(len(task_planner.q.queue))
-        
-        if len(task_planner.q.queue) > 0:
+        task_queue = task_planner.select_task()
+
+        if len(task_queue) > 0:
             
-            for i in range(len(task_planner.q.queue)):
+            for i in range(len(task_queue)):
                 item = TaskQueueItem()
-                item.task_type = task_planner.q.queue[i].task_type
-                item.place = task_planner.q.queue[i].place
+                item.task_type = task_queue[i].task_type
+                item.place = task_queue[i].place
                 
                 # log.info((item.task_type, item.place))
                 
