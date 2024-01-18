@@ -41,9 +41,11 @@ class TaskPlanning():
             log.info(id)
 
         # (현재 큐에 없는 것만) 큐에 추가
-        for task in task_list:
-            if task[0] not in id_list:
-                self.q.put(Task(id = task[0], task_type_id = task[1], goal_point = task[2], task_type = task[3], place = task[4]))
+        
+        if task_list != None:
+            for task in task_list:
+                if task[0] not in id_list:
+                    self.q.put(Task(id = task[0], task_type_id = task[1], goal_point = task[2], task_type = task[3], place = task[4]))
             
         return self.q
         

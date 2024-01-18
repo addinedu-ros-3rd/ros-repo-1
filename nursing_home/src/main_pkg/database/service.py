@@ -36,7 +36,7 @@ class DataManager:
             
     def select_waiting_robot(self):
         try:
-            query = "SELECT id FROM robot WHERE robot_status_id = 2"
+            query = "SELECT id FROM robot WHERE robot_status_id = 2 order by id"
             waiting_robot = db.executeAndFetchOne(query)
             
             return waiting_robot
@@ -103,40 +103,26 @@ class DataManager:
     def select_all_robot_status(self):
         try:
             query = """
-                    SELECT 
-                        ttt1.robot_id,
-                        ttt1.status,
-                        CASE WHEN ttt1.status = '대기중' THEN '' ELSE MAX(tt.meaning) END as task,
-                        CASE WHEN ttt1.status = '대기중' THEN '' ELSE MAX(ttt1.place) END as place,
-                        MAX(ttt1.task_id) AS task_id
+                    SELECT t2.id,
+                        rs.meaning as robot_status, 
+                        IFNULL(t2.meaning, '') as task_type,
+                        IFNULL(t2.place, '') as goal
                     FROM (
-                        SELECT 
-                            tt1.id as robot_id,
-                            tt1.status,
-                            t.task_type_id,
-                            t.place,
-                            t.id as task_id
+                        SELECT t1.id, t1.robot_status_id, tt.meaning, t1.place
                         FROM (
-                            SELECT 
-                                t1.id,
-                                t1.battery,
-                                t1.status,
-                                rwm.meaning
-                            FROM (
-                                SELECT 
-                                    r.id,
-                                    r.battery,
-                                    rs.meaning as status,
-                                    r.robot_work_mode_id
-                                FROM robot r
-                                JOIN robot_status rs ON r.robot_status_id = rs.id
-                            ) t1
-                            JOIN robot_work_mode rwm ON t1.robot_work_mode_id = rwm.id
-                        ) tt1
-                        LEFT JOIN task t ON tt1.id = t.robot_id
-                    ) ttt1
-                    LEFT JOIN task_type tt ON ttt1.task_type_id = tt.id
-                    GROUP BY ttt1.robot_id
+                            SELECT r.id, r.robot_status_id, t.task_type_id, t.place
+                            FROM robot r
+                            LEFT JOIN task t ON r.id = t.robot_id AND t.finished_at IS NULL
+                            LEFT JOIN (
+                                SELECT robot_id, MAX(id) AS max_task_id
+                                FROM task
+                                GROUP BY robot_id
+                            ) latest_task ON t.robot_id = latest_task.robot_id AND t.id = latest_task.max_task_id
+                        ) t1
+                        LEFT JOIN task_type tt ON t1.task_type_id = tt.id
+                    ) t2
+                    LEFT JOIN robot_status rs ON t2.robot_status_id = rs.id
+                    order by id
                     """
             robot_status_list = db.executeAndFetchAll(query)
             

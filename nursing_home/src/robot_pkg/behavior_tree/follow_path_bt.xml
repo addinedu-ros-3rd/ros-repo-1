@@ -1,0 +1,14 @@
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery"><!-- 실패 시 6번 재시도 -->
+      <FollowPath path="{path}" controller_id="FollowPath"/>
+      <ReactiveFallback name="RecoveryFallback"><!-- child 실패 시 restart -->
+        <GoalReached goal="{goal}" robot_base_frame="base_link"/>
+        <RoundRobin name="RecoveryActions"><!-- children이 모두 실패하면 실패 -> 1) 1만큼 회전 시도 -> 2) 실패 시 0.05만큼 1의 속도로 물러남 -->
+          <Spin spin_dist="1"/>
+          <BackUp backup_dist="0.05" backup_speed="0.5"/>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>
