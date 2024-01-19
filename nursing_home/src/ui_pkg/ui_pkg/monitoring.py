@@ -221,6 +221,8 @@ class WindowClass(QMainWindow, from_class):
         super().__init__()
         self.setupUi(self)
         self.task_queue.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.robot_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.setWindowTitle('Monitoring')
 
         # 시간 표시하기     
         timer = QTimer(self)
@@ -231,28 +233,15 @@ class WindowClass(QMainWindow, from_class):
         # 토픽 발행하기
         self.count = 0
         self.node = rp.create_node('task_node')
-
-        self.serve_btn.clicked.connect(self.pub)
-        self.serve_stop.clicked.connect(self.stop)
         
         self.publisher = self.node.create_publisher(TaskRequest, 'task_request', 10)
-        self.timer = self.node.create_timer(1000, self.pub)
-
-        self.serve_btn.hide()
-        self.task_combo.hide()
-        self.location_combo.hide()
-        self.call_btn.hide()
-        self.serve_stop.hide()
-
-        self.serve_mode.clicked.connect(self.serve)
-        self.normal_mode.clicked.connect(self.normal)
+        # self.timer = self.node.create_timer(1000, self.pub)
 
         # 다크모드 만들기
         self.dark_btn.clicked.connect(self.change_to_black)
         self.white_btn.clicked.connect(self.change_to_white)
 
-        self.zeroto255 = [self.time_label, self.title_label, self.robot_table, self.queue_label, self.cctv_label,
-                          self.serve_mode, self.serve_btn, self.serve_stop, self.normal_mode, self.task_label,
+        self.zeroto255 = [self.time_label, self.robot_table, self.queue_label, self.cctv_label, self.task_label, self.map_label,
                           self.task_combo, self.location_combo, self.call_btn, self.task_queue, self.view_label]
         
         self.labels = [self.map_group, self.cam_group, self.request_group, self.cctv_group]
@@ -270,7 +259,7 @@ class WindowClass(QMainWindow, from_class):
         self.width = self.pixmap.size().width()
         self.image_scale = 6
         self.pixmap = self.pixmap.transformed(QTransform().scale(-1, -1))
-        self.map_label.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
+        self.map.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
     
         self.now_x = 0
         self.now_y = 0
@@ -279,9 +268,9 @@ class WindowClass(QMainWindow, from_class):
         self.map_origin = (-0.315, -2.76)
         
     def updateMap(self):
-        self.map_label.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
+        self.map.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
 
-        painter = QPainter(self.map_label.pixmap())
+        painter = QPainter(self.map.pixmap())
 
         x, y = self.calc_grid_position(amcl_1.pose.pose.position.x, amcl_1.pose.pose.position.y)
 
@@ -341,21 +330,14 @@ class WindowClass(QMainWindow, from_class):
         self.count += 1
         self.publisher.publish(req)
         
-        
-    def pub(self):
-        self.serve_stop.show()
-        self.serve_btn.setText('진행 중..')
-        msg = String()
-        msg.data = f"배식 모드 ON! {self.count}"
-        self.count += 1
-        self.node.get_logger().info(f"Publishing: {msg.data}")
-        self.publisher.publish(msg)
 
-
-    def stop(self):
-        self.count = 0
-        self.timer.cancel()
-        self.node.get_logger().info("Stop Button")   
+    # def pub(self):
+    #     self.serve_stop.show()
+    #     msg = String()
+    #     msg.data = f"배식 모드 ON! {self.count}"
+    #     self.count += 1
+    #     self.node.get_logger().info(f"Publishing: {msg.data}")
+    #     self.publisher.publish(msg)
         
         
     def change_colors(self, color_rgb):
@@ -378,16 +360,6 @@ class WindowClass(QMainWindow, from_class):
         self.change_colors('rgb(0,0,0);')
         self.setStyleSheet('')
         self.change_labels('')
-
-
-    def serve(self):
-        self.serve_btn.show()
-    
-    
-    def normal(self):
-        self.task_combo.show()
-        self.location_combo.show()
-        self.call_btn.show()
 
 
     def time(self):
