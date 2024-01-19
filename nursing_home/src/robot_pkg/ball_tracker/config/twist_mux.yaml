@@ -1,0 +1,11 @@
+twist_mux:
+  ros__parameters:
+    topics:
+      navigation:
+        topic   : /base_controller/cmd_vel_unstamped
+        timeout : 0.5
+        priority: 10
+      tracker:
+        topic   : /base_controller/cmd_vel_unstamped  # cmd_vel_tracker
+        timeout : 0.5
+        priority: 20
