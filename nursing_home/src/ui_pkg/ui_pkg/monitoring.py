@@ -47,7 +47,7 @@ class AmclSubscriber(Node):
                 history=QoSHistoryPolicy.KEEP_LAST,
                 depth=1)
         
-        # 3개의 로봇이 전부 표시되어야 함
+        # 3개의 로봇 위치 표시
         self.pose1 = self.create_subscription(
             PoseWithCovarianceStamped, 
             '/amcl_pose_1', 
@@ -131,7 +131,6 @@ class CctvVideoSubscriber(Node):
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
         height, width, channel = image_np.shape
-        # self.get_logger().info(image_np.shape)
         bytes_per_line = 3 * width
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
@@ -187,7 +186,6 @@ class EmergencySubscriber(Node):
             self.ui.cctv_label.setText("CCTV 🟢")
             
 
-
 class TaskQueueSubscriber(Node):
 
     def __init__(self, ui):
@@ -208,7 +206,7 @@ class TaskQueueSubscriber(Node):
         if len(msg.data) > 0:
             for i in range(len(msg.data)):
                 # print(msg.data[i].task_type, msg.data[i].place)
-                
+                        
                 if self.ui.task_queue.rowCount() < len(msg.data):
                     self.ui.task_queue.insertRow(i)
                     
@@ -235,7 +233,6 @@ class WindowClass(QMainWindow, from_class):
         self.node = rp.create_node('task_node')
         
         self.publisher = self.node.create_publisher(TaskRequest, 'task_request', 10)
-        # self.timer = self.node.create_timer(1000, self.pub)
 
         # 다크모드 만들기
         self.dark_btn.clicked.connect(self.change_to_black)
@@ -331,15 +328,6 @@ class WindowClass(QMainWindow, from_class):
         self.publisher.publish(req)
         
 
-    # def pub(self):
-    #     self.serve_stop.show()
-    #     msg = String()
-    #     msg.data = f"배식 모드 ON! {self.count}"
-    #     self.count += 1
-    #     self.node.get_logger().info(f"Publishing: {msg.data}")
-    #     self.publisher.publish(msg)
-        
-        
     def change_colors(self, color_rgb):
         for target in self.zeroto255:
             target.setStyleSheet(f'color: {color_rgb};')
