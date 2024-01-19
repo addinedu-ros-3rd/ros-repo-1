@@ -121,8 +121,8 @@ class AStarPublisher2(Node):
             
 
     def task_callback(self, msg):
-        self.now_x = amcl_1.pose.pose.position.x
-        self.now_y = amcl_1.pose.pose.position.y
+        self.now_x = amcl_2.pose.pose.position.x
+        self.now_y = amcl_2.pose.pose.position.y
 
         pose_stamp = PoseWithCovarianceStamped()
         pose_stamp.header.frame_id = 'map'
@@ -159,8 +159,8 @@ class AStarPublisher3(Node):
             
 
     def task_callback(self, msg):
-        self.now_x = amcl_1.pose.pose.position.x
-        self.now_y = amcl_1.pose.pose.position.y
+        self.now_x = amcl_3.pose.pose.position.x
+        self.now_y = amcl_3.pose.pose.position.y
 
         pose_stamp = PoseWithCovarianceStamped()
         pose_stamp.header.frame_id = 'map'

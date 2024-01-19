@@ -36,6 +36,12 @@ amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
 amcl_3 = PoseWithCovarianceStamped()
 
+global path_1, path_2, path_3
+path_1 = AstarMsg()
+path_2 = AstarMsg()
+path_3 = AstarMsg()
+
+
 class AmclSubscriber(Node):
 
     def __init__(self):
@@ -70,12 +76,55 @@ class AmclSubscriber(Node):
     def amcl_callback1(self, amcl):
         global amcl_1
         amcl_1 = amcl
+        
     def amcl_callback2(self, amcl):
         global amcl_2
         amcl_2 = amcl
+        
     def amcl_callback3(self, amcl):
         global amcl_3
         amcl_3 = amcl
+        
+class PathSubscriber(Node):
+    
+    def __init__(self):
+        super().__init__('path_subscriber')
+        
+        self.sub1 = self.create_subscription(
+            AstarMsg,
+            '/astar_paths_1',
+            self.path_callback1,
+            10
+        )
+        
+        self.sub2 = self.create_subscription(
+            AstarMsg,
+            '/astar_paths_2',
+            self.path_callback2,
+            10
+        )
+        
+        self.sub3 = self.create_subscription(
+            AstarMsg,
+            '/astar_paths_3',
+            self.path_callback3,
+            10
+        )
+        
+    def path_callback1(self, path):
+        global path_1
+        path_1 = path
+        
+        
+    def path_callback2(self, path):
+        global path_2
+        path_2 = path
+        
+        
+    def path_callback3(self, path):
+        global path_3
+        path_3 = path
+        
 
 class PiCamSubscriber(Node):
 
@@ -102,6 +151,7 @@ class PiCamSubscriber(Node):
             lambda data: self.listener_callback(data, self.ui.cam_r3_3),
             10)
 
+
     def listener_callback(self, data, label_widget):
         np_arr = np.frombuffer(data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -111,6 +161,7 @@ class PiCamSubscriber(Node):
         q_image = QImage(image_np.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
         label_widget.setPixmap(pixmap)
+
 
 class CctvVideoSubscriber(Node):
     
@@ -126,6 +177,7 @@ class CctvVideoSubscriber(Node):
             qos_profile_sensor_data)
         
         self.bridge = CvBridge()
+    
     
     def video_callback(self, msg):
         np_arr = np.frombuffer(msg.data, np.uint8)
@@ -151,6 +203,7 @@ class RobotStatusSubscriber(Node):
             self.callback,
             1
         )
+
 
     def callback(self, msg):
         
@@ -180,6 +233,7 @@ class EmergencySubscriber(Node):
             1
         )
 
+
     def callback(self, msg):
         if msg.data == 'Collapsed':
             self.ui.cctv_label.setText("Emergency 🔴")
@@ -200,6 +254,7 @@ class TaskQueueSubscriber(Node):
             1
         )
         
+        
     def callback(self, msg):
         if len(msg.data) != self.ui.task_queue.rowCount():
             self.ui.task_queue.setRowCount(0)
@@ -213,6 +268,7 @@ class TaskQueueSubscriber(Node):
                     
                     self.ui.task_queue.setItem(i, 0, QTableWidgetItem(msg.data[i].task_type))
                     self.ui.task_queue.setItem(i, 1, QTableWidgetItem(msg.data[i].place))
+
 
 class WindowClass(QMainWindow, from_class):
 
@@ -268,6 +324,7 @@ class WindowClass(QMainWindow, from_class):
         self.map_resolution = map_yaml_data['resolution']
         self.map_origin = map_yaml_data['origin'][:2]
         
+        
     def updateMap(self):
         self.map.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
 
@@ -280,24 +337,67 @@ class WindowClass(QMainWindow, from_class):
         self.font.setBold(True)
         self.font.setPointSize(15)
         painter.setFont(self.font)
-        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
-        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '1')
+        painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '1')
+        
+        x_before = None
+        
+        for i in range(path_1.length):
+            x, y = self.calc_grid_position(path_1.poses[i].position.x, path_1.poses[i].position.y)
+            x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            
+            if x_before is not None:
+                painter.setPen(QPen(Qt.darkRed, 5))
+                painter.drawLine(x_before, y_before, x, y)
+            
+            painter.setPen(QPen(Qt.darkRed, 10))
+            painter.drawPoint(x, y)
+            x_before, y_before = x, y
         
         #-------------
         x, y = self.calc_grid_position(amcl_2.pose.pose.position.x, amcl_2.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.blue, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
-        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '2')
+        painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '2')
+        
+        x_before = None
+        
+        for i in range(path_2.length):
+            x, y = self.calc_grid_position(path_2.poses[i].position.x, path_2.poses[i].position.y)
+            x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            
+            if x_before is not None:
+                painter.setPen(QPen(Qt.darkBlue, 5))
+                painter.drawLine(x_before, y_before, x, y)
+            
+            painter.setPen(QPen(Qt.darkBlue, 10))
+            painter.drawPoint(x, y)
+            x_before, y_before = x, y
 
         #-------------
         x, y = self.calc_grid_position(amcl_3.pose.pose.position.x, amcl_3.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.green, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x)* self.image_scale), int(y * self.image_scale))
-        painter.drawText(int((self.width - x)* self.image_scale + 13), int(y * self.image_scale + 5), '3')
+        painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
+        painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '3')
+        
+        x_before = None
+        
+        for i in range(path_3.length):
+            x, y = self.calc_grid_position(path_3.poses[i].position.x, path_3.poses[i].position.y)
+            x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            
+            if x_before is not None:
+                painter.setPen(QPen(Qt.darkGreen, 5))
+                painter.drawLine(x_before, y_before, x, y)
+            
+            painter.setPen(QPen(Qt.darkGreen, 10))
+            painter.drawPoint(x, y)
+            x_before, y_before = x, y
 
-        painter.end
+        painter.end()
+
 
     def calc_grid_position(self, x, y):
         pos_x = (x - self.map_origin[0]) / self.map_resolution
@@ -385,6 +485,9 @@ def main():
 
     amcl_subscriber = AmclSubscriber()
     executor.add_node(amcl_subscriber)
+    
+    path_subscriber = PathSubscriber()
+    executor.add_node(path_subscriber)
 
     thread = Thread(target=executor.spin)
     thread.start()
