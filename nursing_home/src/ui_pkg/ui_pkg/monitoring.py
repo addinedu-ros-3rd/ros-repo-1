@@ -25,9 +25,10 @@ import numpy as np
 import cv2
 import sys
 import os
+import yaml
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
-map_file = os.path.join(get_package_share_directory('main_pkg'), 'map', 'home.pgm')
+map_yaml_file = os.path.join(get_package_share_directory('main_pkg'), 'map', 'home.yaml')
 from_class = uic.loadUiType(ui_file)[0]
 
 global amcl_1, amcl_2, amcl_3
@@ -250,8 +251,11 @@ class WindowClass(QMainWindow, from_class):
         self.dm = DataManager()
         self.set_combo()
 
+        with open(map_yaml_file) as f:
+            map_yaml_data = yaml.full_load(f)
+
         # map 관련
-        self.pixmap = QPixmap(map_file)
+        self.pixmap = QPixmap(os.path.join(get_package_share_directory('main_pkg'), 'map', map_yaml_data['image']))
         self.height = self.pixmap.size().height()
         self.width = self.pixmap.size().width()
         self.image_scale = 6
@@ -261,8 +265,8 @@ class WindowClass(QMainWindow, from_class):
         self.now_x = 0
         self.now_y = 0
 
-        self.map_resolution = 0.05
-        self.map_origin = (-0.315, -2.76)
+        self.map_resolution = map_yaml_data['resolution']
+        self.map_origin = map_yaml_data['origin'][:2]
         
     def updateMap(self):
         self.map.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
