@@ -25,13 +25,11 @@ class ActionPublisher(Node):
             self.img_publisher = self.create_publisher(CompressedImage, '/cctv_video', qos_profile_sensor_data)
             self.timer = self.create_timer(TIMER_PERIOD, self.action_timer_callback)
             
-            
             self.action_output_data = None
             self.action_output_frame = None
 
             cv2.destroyAllWindows()
             self.cap = cv2.VideoCapture(0)
-
             
             self.attention_dot = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
             self.draw_line = [[11, 13], [13, 15], [12, 14], [14, 16], [23, 25], [25, 27], 
@@ -69,7 +67,6 @@ class ActionPublisher(Node):
                 img = img[:, :400, :]
                 cvt_img = self.bridge.cv2_to_compressed_imgmsg(img)
                 self.img_publisher.publish(cvt_img)
-                
 
                 action_output_frame, self.action_output_data = self.Action.predict(img)
 
@@ -80,9 +77,6 @@ class ActionPublisher(Node):
                 
                 cv2.imshow("Action Cam", action_output_frame)
                 cv2.waitKey(1)
-
-
-
 
 
 def main(args=None):
@@ -100,8 +94,6 @@ def main(args=None):
     finally :
         action_pulisher.destroy_node()
         rclpy.shutdown()
-
-
 
 
 if __name__ == '__main__' :
