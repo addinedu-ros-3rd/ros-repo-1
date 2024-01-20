@@ -27,6 +27,9 @@ import sys
 import os
 import yaml
 
+
+GOAL_REACHED_TOL_DEFAULT = 0.25
+
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'monitoring.ui')
 map_yaml_file = os.path.join(get_package_share_directory('main_pkg'), 'map', 'home.yaml')
 from_class = uic.loadUiType(ui_file)[0]
@@ -36,10 +39,16 @@ amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
 amcl_3 = PoseWithCovarianceStamped()
 
-global path_1, path_2, path_3
+global path_1, path_2, path_3, path_before_1, path_before_2, path_before_3
 path_1 = AstarMsg()
 path_2 = AstarMsg()
 path_3 = AstarMsg()
+path_before_1 = AstarMsg()
+path_before_2 = AstarMsg()
+path_before_3 = AstarMsg()
+
+global start_point_1, start_point_2, start_point_3
+start_point_1, start_point_2, start_point_3 = None, None, None
 
 
 class AmclSubscriber(Node):
@@ -112,18 +121,47 @@ class PathSubscriber(Node):
         )
         
     def path_callback1(self, path):
-        global path_1
+        global path_1, amcl_1, start_point_1
         path_1 = path
+        start_point_1 = amcl_1
         
         
     def path_callback2(self, path):
-        global path_2
+        global path_2, amcl_2, start_point_2
         path_2 = path
+        start_point_2 = amcl_2
         
         
     def path_callback3(self, path):
-        global path_3
+        global path_3, amcl_3, start_point_3
         path_3 = path
+        start_point_3 = amcl_3
+        
+class DoneTaskSubscriber(Node):
+    def __init__(self):
+        super().__init__('done_task_subscriber')
+        
+        self.done_task_1 = self.create_subscription(String, '/done_task_1', self.done_task_callback_1, 10)
+        self.done_task_2 = self.create_subscription(String, '/done_task_2', self.done_task_callback_2, 10)
+        self.done_task_3 = self.create_subscription(String, '/done_task_3', self.done_task_callback_3, 10)
+
+    def done_task_callback_1(self, msg):
+        if msg.data == 'OK':
+            global path_1, path_before_1
+            path_before_1 = path_1
+            path_1 = AstarMsg()
+
+    def done_task_callback_2(self, msg):
+        if msg.data == 'OK':
+            global path_2, path_before_2
+            path_before_2 = path_2
+            path_2 = AstarMsg()
+
+    def done_task_callback_3(self, msg):
+        if msg.data == 'OK':
+            global path_3, path_before_3
+            path_before_3 = path_3
+            path_3 = AstarMsg()
         
 
 class PiCamSubscriber(Node):
@@ -329,72 +367,156 @@ class WindowClass(QMainWindow, from_class):
         self.map.setPixmap(self.pixmap.scaled(self.width * self.image_scale, self.height * self.image_scale, Qt.KeepAspectRatio))
 
         painter = QPainter(self.map.pixmap())
-
-        x, y = self.calc_grid_position(amcl_1.pose.pose.position.x, amcl_1.pose.pose.position.y)
-
-        painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
+        
+        # 로봇 번호 표시
         self.font = QFont()
         self.font.setBold(True)
         self.font.setPointSize(15)
         painter.setFont(self.font)
+        
+        # 1번 로봇 좌표
+        x, y = self.calc_grid_position(amcl_1.pose.pose.position.x, amcl_1.pose.pose.position.y)
+
+        painter.setPen(QPen(Qt.red, 20, Qt.SolidLine))
         painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
         painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '1')
         
-        x_before = None
+        # 1번 로봇 경로
         
-        for i in range(path_1.length):
+        # 현황: 경로를 그려준 채로 로봇이 그 위에서 움직임
+        # todo: 로봇이 지나간 좌표의 선은 지워주기
+        
+        # 참고: 현재 좌표를 x_before, y_before로 주고 시작하면 로봇이 움직이면서 기존에 그렸던 선이 예쁘게 지워짐
+        # 근데 waypoint를 지나가면서 기존 waypoint도 남아있어서 선이 이상하게 그려짐
+        if start_point_1 is not None:
+            x_start, y_start = self.calc_grid_position(start_point_1.pose.pose.position.x, start_point_1.pose.pose.position.y)
+            x_start, y_start = int((self.width - x_start) * self.image_scale), int(y_start * self.image_scale)
+        
+        x_before_recorded = False
+        
+        # 완료된 waypoint 지우기
+        if path_1.length == 0 and path_before_1.length != 0:    
+            for i in range(path_before_1.length):
+                x, y = self.calc_grid_position(path_before_1.poses[i].position.x, path_before_1.poses[i].position.y)
+                x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+                painter.setPen(QPen(QColor(0, 0, 0, 0)))
+                
+                if x_before_recorded:
+                    painter.drawLine(x_before, y_before, x, y)
+                else:
+                    painter.drawLine(x_start, y_start, x, y)
+                
+                painter.drawPoint(x, y)
+                x_before, y_before = x, y
+                x_before_recorded = True
+        
+        # 신규 waypoint 그리기
+        for i in range(len(path_1.poses)):
             x, y = self.calc_grid_position(path_1.poses[i].position.x, path_1.poses[i].position.y)
             x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            painter.setPen(QPen(Qt.darkRed, 5))
             
-            if x_before is not None:
-                painter.setPen(QPen(Qt.darkRed, 5))
+            if x_before_recorded:
                 painter.drawLine(x_before, y_before, x, y)
+            else:
+                painter.drawLine(x_start, y_start, x, y)
             
             painter.setPen(QPen(Qt.darkRed, 10))
             painter.drawPoint(x, y)
             x_before, y_before = x, y
+            x_before_recorded = True
         
-        #-------------
+        # 2번 로봇 좌표
         x, y = self.calc_grid_position(amcl_2.pose.pose.position.x, amcl_2.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.blue, 20, Qt.SolidLine))
         painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
         painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '2')
         
-        x_before = None
+        # 2번 로봇 경로
+        if start_point_2 is not None:
+            x_start, y_start = self.calc_grid_position(start_point_2.pose.pose.position.x, start_point_2.pose.pose.position.y)
+            x_start, y_start = int((self.width - x_start) * self.image_scale), int(y_start * self.image_scale)
         
-        for i in range(path_2.length):
+        x_before_recorded = False
+        
+        # 완료된 waypoint 지우기
+        if path_2.length == 0 and path_before_2.length != 0:    
+            for i in range(path_before_2.length):
+                x, y = self.calc_grid_position(path_before_2.poses[i].position.x, path_before_2.poses[i].position.y)
+                x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+                painter.setPen(QPen(QColor(0, 0, 0, 0)))
+                
+                if x_before_recorded:
+                    painter.drawLine(x_before, y_before, x, y)
+                else:
+                    painter.drawLine(x_start, y_start, x, y)
+                
+                painter.drawPoint(x, y)
+                x_before, y_before = x, y
+                x_before_recorded = True
+        
+        # 신규 waypoint 그리기
+        for i in range(len(path_2.poses)):
             x, y = self.calc_grid_position(path_2.poses[i].position.x, path_2.poses[i].position.y)
             x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            painter.setPen(QPen(Qt.darkBlue, 5))
             
-            if x_before is not None:
-                painter.setPen(QPen(Qt.darkBlue, 5))
+            if x_before_recorded:
                 painter.drawLine(x_before, y_before, x, y)
+            else:
+                painter.drawLine(x_start, y_start, x, y)
             
             painter.setPen(QPen(Qt.darkBlue, 10))
             painter.drawPoint(x, y)
             x_before, y_before = x, y
+            x_before_recorded = True
 
-        #-------------
-        x, y = self.calc_grid_position(amcl_3.pose.pose.position.x, amcl_3.pose.pose.position.y)
+        # 3번 로봇 좌표
+        x_now, y_now = self.calc_grid_position(amcl_3.pose.pose.position.x, amcl_3.pose.pose.position.y)
 
         painter.setPen(QPen(Qt.green, 20, Qt.SolidLine))
-        painter.drawPoint(int((self.width - x) * self.image_scale), int(y * self.image_scale))
-        painter.drawText(int((self.width - x) * self.image_scale + 13), int(y * self.image_scale + 5), '3')
+        painter.drawPoint(int((self.width - x_now) * self.image_scale), int(y_now * self.image_scale))
+        painter.drawText(int((self.width - x_now) * self.image_scale + 13), int(y_now * self.image_scale + 5), '3')
         
-        x_before = None
+        # 3번 로봇 경로
+        if start_point_3 is not None:
+            x_start, y_start = self.calc_grid_position(start_point_3.pose.pose.position.x, start_point_3.pose.pose.position.y)
+            x_start, y_start = int((self.width - x_start) * self.image_scale), int(y_start * self.image_scale)
         
-        for i in range(path_3.length):
+        x_before_recorded = False
+        
+        # 완료된 waypoint 지우기
+        if path_3.length == 0 and path_before_3.length != 0:    
+            for i in range(path_before_3.length):
+                x, y = self.calc_grid_position(path_before_3.poses[i].position.x, path_before_3.poses[i].position.y)
+                x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+                painter.setPen(QPen(QColor(0, 0, 0, 0)))
+                
+                if x_before_recorded:
+                    painter.drawLine(x_before, y_before, x, y)
+                else:
+                    painter.drawLine(x_start, y_start, x, y)
+                
+                painter.drawPoint(x, y)
+                x_before, y_before = x, y
+                x_before_recorded = True
+        
+        # 신규 waypoint 그리기
+        for i in range(len(path_3.poses)):
             x, y = self.calc_grid_position(path_3.poses[i].position.x, path_3.poses[i].position.y)
             x, y = int((self.width - x) * self.image_scale), int(y * self.image_scale)
+            painter.setPen(QPen(Qt.darkGreen, 5))
             
-            if x_before is not None:
-                painter.setPen(QPen(Qt.darkGreen, 5))
+            if x_before_recorded:
                 painter.drawLine(x_before, y_before, x, y)
+            else:
+                painter.drawLine(x_start, y_start, x, y)
             
             painter.setPen(QPen(Qt.darkGreen, 10))
             painter.drawPoint(x, y)
             x_before, y_before = x, y
+            x_before_recorded = True
 
         painter.end()
 
@@ -403,6 +525,12 @@ class WindowClass(QMainWindow, from_class):
         pos_x = (x - self.map_origin[0]) / self.map_resolution
         pos_y = (y - self.map_origin[1]) / self.map_resolution
         return pos_x, pos_y
+    
+    # 현재 좌표가 주어진 경로를 지나갔는지 체크하기 위한 함수
+    # 정확하지 않음
+    def is_nearby(x, y, x1, y1):
+        distance = ((x - x1) ** 2 + (y - y1) ** 2) ** 0.5
+        return distance <= GOAL_REACHED_TOL_DEFAULT  # goal_reached_tol default
     
     
     def set_combo(self):
@@ -488,6 +616,9 @@ def main():
     
     path_subscriber = PathSubscriber()
     executor.add_node(path_subscriber)
+    
+    done_task_subscriber = DoneTaskSubscriber()
+    executor.add_node(done_task_subscriber)
 
     thread = Thread(target=executor.spin)
     thread.start()

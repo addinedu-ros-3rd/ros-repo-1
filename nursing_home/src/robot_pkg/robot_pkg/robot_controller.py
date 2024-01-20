@@ -66,7 +66,7 @@ class GoPoseNode(Node):
             goal_pose.pose.orientation.z = astar_paths.poses[i].orientation.z
             goal_pose.pose.orientation.w = astar_paths.poses[i].orientation.w
             # paths.append(goal_pose)
-            self.navigator.goToPose(goal_pose, behavior_tree='')
+            self.navigator.goToPose(goal_pose, behavior_tree=bt_file)
 
 
             j = 0
