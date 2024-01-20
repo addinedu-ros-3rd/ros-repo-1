@@ -11,7 +11,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from ament_index_python.packages import get_package_share_directory
 import os
 
-bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_w_replanning_only_if_goal_is_updated.xml')
+bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_to_pose_and_pause_near_obstacle_proj.xml')
 
 
 class TaskSubscriber(Node):
