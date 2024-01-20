@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy, QoSProfile
 from rclpy.executors import MultiThreadedExecutor
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from rclpy.duration import Duration
@@ -9,7 +10,10 @@ from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, Twist
 
 from ament_index_python.packages import get_package_share_directory
+
+
 import os
+from math import sqrt
 
 bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_to_pose_and_pause_near_obstacle_proj.xml')
 
@@ -162,7 +166,10 @@ class GoPoseNode(Node):
                 print('Goal failed!')
             else:
                 print('Goal has an invalid return status!')
-                    
+              
+    @staticmethod
+    def calc_diff_distance(sx, gx, sy, gy):
+        return sqrt(pow(gx - sx, 2) + pow(gy - sy, 2))      
 
 def main():
     rclpy.init()
