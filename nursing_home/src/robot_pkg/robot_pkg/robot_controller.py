@@ -6,13 +6,32 @@ from rclpy.duration import Duration
 
 from interfaces_pkg.msg import TaskRequest, AstarMsg
 from std_msgs.msg import String
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, Twist
 
 from ament_index_python.packages import get_package_share_directory
 import os
 
 bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_to_pose_and_pause_near_obstacle_proj.xml')
 
+
+global amcl
+amcl = PoseWithCovarianceStamped()
+
+class AMCLSubscriber(Node):
+    def __init__(self):
+        super().__init__('amcl_subscriber')
+
+        amcl_pose_qos = QoSProfile(
+          durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+          reliability=QoSReliabilityPolicy.RELIABLE,
+          history=QoSHistoryPolicy.KEEP_LAST,
+          depth=1)
+        
+        self.amcl_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.amcl_callback, amcl_pose_qos) # 아직 어떤 로봇 불러올지 안맞춤
+
+    def amcl_callback(self, msg):
+        global amcl
+        amcl = msg
 
 class TaskSubscriber(Node):
     def __init__(self):
@@ -39,15 +58,21 @@ class GoPoseNode(Node):
         self.amcl = PoseWithCovarianceStamped()
         self.navigator = BasicNavigator()
 
-        self.done_publisher = self.create_publisher(String, '/done_task', 10)        
+        self.vel_linear = 0.2
+
+        self.done_publisher = self.create_publisher(String, '/done_task', 10)       
+        self.cmd_vel_pub = self.create_publisher(Twist, '/base_controller/cmd_vel_unstamped', 10) 
         self.astar_path_sub = self.create_subscription(AstarMsg,
                                                        'astar_paths',
                                                        self.astarCallback,
                                                        10)
 
     def astarCallback(self, astar_paths):
+        global amcl
         # self.navigator.waitUntilNav2Active()
 
+        print(astar_paths.length)
+        
         if astar_paths.length < 1:
             print("Invalid Paths")
             msg = String()
@@ -94,9 +119,34 @@ class GoPoseNode(Node):
                     if Duration.from_msg(feedback.navigation_time) > Duration(seconds=20.0):
                         self.navigator.cancelTask()
 
+            diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
+            twist_msg = Twist()
+            before_diff_distance = diff_distance
+
+            while diff_distance > 0.01:
+                diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
+
+                print("cmd_vel로 조정중...", end='')
+                print(" 목표지점과 거리 : ", diff_distance, 'm')
+
+                if before_diff_distance < diff_distance:
+                    # continue_flag = True
+                    break
+
+                twist_msg.linear.x = self.vel_linear
+                self.cmd_vel_pub.publish(twist_msg)
+
+
+                before_diff_distance = diff_distance
+
+            twist_msg.linear.x = 0.0
+            self.cmd_vel_pub.publish(twist_msg)
+
+            diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
+
             # Do something depending on the return code
             result = self.navigator.getResult()
-            if result == TaskResult.SUCCEEDED:
+            if result == TaskResult.SUCCEEDED or diff_distance <= 0.01:
                 if i == astar_paths.length - 1:
                     # 업무 완료
                     msg = String()
@@ -124,6 +174,10 @@ def main():
     # navigation 수행 노드
     go_pose_node = GoPoseNode()
     executor.add_node(go_pose_node)
+
+    # amcl subscriber
+    amcl_subscriber = AMCLSubscriber()
+    executor.add_node(amcl_subscriber)
     
     executor.spin()
     

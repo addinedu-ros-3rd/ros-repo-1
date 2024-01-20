@@ -130,6 +130,8 @@ class AStarPlanner:
         open_set, closed_set = dict(), dict()
         open_set[self.calc_grid_index(start_node)] = start_node
 
+        is_starting = True     # navigation으로 스타팅 포인트가 padding 벗어났을 때 verifying 안하고 넘어가는 용도
+        
         while True:
             if len(open_set) == 0:
                 print("Open set is empty..")
@@ -171,7 +173,7 @@ class AStarPlanner:
                 n_id = self.calc_grid_index(node)
 
                 # If the node is not safe, do nothing
-                if not self.verify_node(node):
+                if (not is_starting) and (not self.verify_node(node)):
                     continue
 
                 if n_id in closed_set:
@@ -183,6 +185,9 @@ class AStarPlanner:
                     if open_set[n_id].cost > node.cost:
                         # This path is the best until now. record it
                         open_set[n_id] = node
+
+                is_starting = False
+
 
         rx, ry, tpx, tpy, tvec_x, tvec_y = self.calc_final_path(goal_node, closed_set)
 
