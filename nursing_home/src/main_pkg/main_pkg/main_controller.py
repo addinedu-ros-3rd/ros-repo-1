@@ -227,11 +227,12 @@ class TaskPublisher(Node):
         self.task_2_publisher = self.create_publisher(TaskRequest, "/task_2", 10)
         self.task_3_publisher = self.create_publisher(TaskRequest, "/task_3", 10)
         self.timer = self.create_timer(TIMER_PERIOD, self.task_timer_callback)
+        self.robot_goals = [None, None, None]
         
         
     def task_timer_callback(self):
         task_planner.robot, task_planner.item, task_planner.q, task_planner.robot_status_list = task_planner.give_robot_task()
-        log.info(("robot, item in task_timer_callback: ", task_planner.robot, task_planner.item))
+        # log.info(("robot, item in task_timer_callback: ", task_planner.robot, task_planner.item))
         
         if task_planner.item is not None:
             log.info(task_planner.item.goal_point)
@@ -251,18 +252,28 @@ class TaskPublisher(Node):
             msg.position.y = float(y)
             msg.position.z = float(z)
             
+            # todo: robot_goals를 done_task에서 None으로 초기화해야 함
+            # if msg in self.robot_goals:
+            #     msg.position.x = float(x) * 0.75
+            #     msg.position.y = float(y) * 0.75
+            
             if task_planner.robot == 1:
                 self.task_1_publisher.publish(msg)
                 task_planner.item = None
                 task_planner.robot = None
+                # self.robot_goals[0] = msg
+                
             elif task_planner.robot == 2:
                 self.task_2_publisher.publish(msg)
                 task_planner.item = None
                 task_planner.robot = None
+                # self.robot_goals[1] = msg
+                
             elif task_planner.robot == 3:
                 self.task_3_publisher.publish(msg)
                 task_planner.item = None
                 task_planner.robot = None
+                # self.robot_goals[2] = msg
         
         
 class TaskQueuePublisher(Node):

@@ -127,7 +127,7 @@ class GoPoseNode(Node):
             twist_msg = Twist()
             before_diff_distance = diff_distance
 
-            while diff_distance > 0.01:
+            while diff_distance > 0.05:
                 diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
 
                 print("cmd_vel로 조정중...", end='')
