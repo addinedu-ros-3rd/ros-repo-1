@@ -166,7 +166,7 @@ class GoPoseNode(Node):
             diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
             before_diff_distance = diff_distance
 
-            while diff_distance > 0.02:
+            while diff_distance > 0.01:
                 diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
 
                 print("cmd_vel로 조정중...", end='')
@@ -189,7 +189,8 @@ class GoPoseNode(Node):
 
             # Do something depending on the return code
             result = self.navigator.getResult()
-            if result == TaskResult.SUCCEEDED:
+            if diff_distance <= 0.03:
+                self.navigator.cancelTask()
                 if i == astar_paths.length - 1:
                     print('Goal succeeded!')
                     msg = String()
@@ -198,8 +199,7 @@ class GoPoseNode(Node):
                     break
                 else:
                     i = i + 1
-            elif diff_distance <= 0.03:
-                self.navigator.cancelTask()
+            elif result == TaskResult.SUCCEEDED:
                 if i == astar_paths.length - 1:
                     print('Goal succeeded!')
                     msg = String()
