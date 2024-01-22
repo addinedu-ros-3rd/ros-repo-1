@@ -162,3 +162,5 @@ cython_debug/
 config.ini
 install/
 log/
+rosbag2*/
+rosbag2*.zip
