@@ -190,12 +190,18 @@ class GoPoseNode(Node):
                 self.navigator.cancelTask()
                 if i == astar_paths.length - 1:
                     print('Goal succeeded!')
+                    msg = String()
+                    msg.data = "OK"
+                    self.done_publisher.publish(msg)
                     break
                 else:
                     i = i + 1
             elif result == TaskResult.SUCCEEDED:
                 if i == astar_paths.length - 1:
                     print('Goal succeeded!')
+                    msg = String()
+                    msg.data = "OK"
+                    self.done_publisher.publish(msg)
                     break
                 else:
                     i = i + 1
