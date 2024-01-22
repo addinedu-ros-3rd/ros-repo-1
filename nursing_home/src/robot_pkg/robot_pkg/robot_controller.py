@@ -13,7 +13,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 import os
-from math import sqrt
+from math import sqrt, atan2, pi
 
 bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_to_pose_and_pause_near_obstacle_proj.xml')
 
@@ -99,6 +99,7 @@ class GoPoseNode(Node):
 
 
             j = 0
+            waiting_cnt = 0
             while not self.navigator.isTaskComplete():
                 ################################################
                 #
@@ -110,6 +111,13 @@ class GoPoseNode(Node):
                 j = j + 1
                 feedback = self.navigator.getFeedback()
                 if feedback and j % 5 == 0:
+                    if int(Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9) == 0:
+                        if waiting_cnt >= 10:
+                            break
+                        waiting_cnt += 1
+                    else:
+                        waiting_cnt = 0
+
                     print(
                         'Estimated time of arrival: '
                         + '{0:.0f}'.format(
@@ -123,11 +131,37 @@ class GoPoseNode(Node):
                     if Duration.from_msg(feedback.navigation_time) > Duration(seconds=20.0):
                         self.navigator.cancelTask()
 
-            diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
+
             twist_msg = Twist()
+            
+            # 각도 조정
+            diff_theta = self.calc_diff_theta(goal_pose.pose.position.x, goal_pose.pose.position.y)
+            before_diff_theta = diff_theta
+
+            while diff_theta > 0.01:
+                diff_theta = self.calc_diff_theta(goal_pose.pose.position.x, goal_pose.pose.position.y)
+
+                print("cmd_vel로 조정중...", end='')
+                print(" 목표지점과 각도 : ", diff_theta * 180 / pi, 'degree')
+
+                if before_diff_theta < diff_theta:
+                    # continue_flag = True
+                    break
+
+                twist_msg.angular.z = self.vel_angle
+                self.cmd_vel_pub.publish(twist_msg)
+
+
+                before_diff_theta = diff_theta
+
+            twist_msg.angular.z = 0.0
+            self.cmd_vel_pub.publish(twist_msg)
+
+            # 거리 조정
+            diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
             before_diff_distance = diff_distance
 
-            while diff_distance > 0.05:
+            while diff_distance > 0.01:
                 diff_distance = self.calc_diff_distance(amcl.pose.pose.position.x, goal_pose.pose.position.x, amcl.pose.pose.position.y, goal_pose.pose.position.y)
 
                 print("cmd_vel로 조정중...", end='')
@@ -150,12 +184,15 @@ class GoPoseNode(Node):
 
             # Do something depending on the return code
             result = self.navigator.getResult()
-            if result == TaskResult.SUCCEEDED or diff_distance <= 0.01:
+            if diff_distance <= 0.02:
+                self.navigator.cancelTask()
                 if i == astar_paths.length - 1:
-                    # 업무 완료
-                    msg = String()
-                    msg.data = "OK"
-                    self.done_publisher.publish(msg)
+                    print('Goal succeeded!')
+                    break
+                else:
+                    i = i + 1
+            elif result == TaskResult.SUCCEEDED:
+                if i == astar_paths.length - 1:
                     print('Goal succeeded!')
                     break
                 else:
