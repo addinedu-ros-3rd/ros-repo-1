@@ -94,6 +94,7 @@ class AmclSubscriber(Node):
         global amcl_3
         amcl_3 = amcl
         
+
 class PathSubscriber(Node):
     
     def __init__(self):
@@ -136,6 +137,7 @@ class PathSubscriber(Node):
         global path_3, amcl_3, start_point_3
         path_3 = path
         start_point_3 = amcl_3
+        
         
 class DoneTaskSubscriber(Node):
     def __init__(self):
@@ -216,7 +218,6 @@ class CctvVideoSubscriber(Node):
         
         self.bridge = CvBridge()
     
-    
     def video_callback(self, msg):
         np_arr = np.frombuffer(msg.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -271,7 +272,6 @@ class EmergencySubscriber(Node):
             1
         )
 
-
     def callback(self, msg):
         if msg.data == 'Collapsed':
             self.ui.cctv_label.setText("Emergency 🔴")
@@ -291,7 +291,6 @@ class TaskQueueSubscriber(Node):
             self.callback,
             1
         )
-        
         
     def callback(self, msg):
         if len(msg.data) != self.ui.task_queue.rowCount():

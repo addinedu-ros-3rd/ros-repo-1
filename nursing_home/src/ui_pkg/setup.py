@@ -11,6 +11,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name + "/ui/", glob.glob('ui_pkg/monitoring.ui')),
+        ('share/' + package_name + "/ui/", glob.glob('ui_pkg/following.ui')),
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
@@ -22,7 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'monitoring = ui_pkg.monitoring:main'
+            'monitoring = ui_pkg.monitoring:main',
+            'following = ui_pkg.following:main'
         ],
     },
 )
