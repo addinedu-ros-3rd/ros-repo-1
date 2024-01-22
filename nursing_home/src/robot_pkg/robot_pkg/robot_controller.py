@@ -63,7 +63,8 @@ class GoPoseNode(Node):
         self.amcl = PoseWithCovarianceStamped()
         self.navigator = BasicNavigator()
 
-        self.vel_linear = 0.2
+        self.vel_linear = 0.1
+        self.vel_angle = 0.2
 
         self.done_publisher = self.create_publisher(String, '/done_task', 10)       
         self.cmd_vel_pub = self.create_publisher(Twist, '/base_controller/cmd_vel_unstamped', 10) 
