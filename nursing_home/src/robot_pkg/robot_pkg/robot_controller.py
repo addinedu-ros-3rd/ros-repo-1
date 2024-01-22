@@ -150,7 +150,10 @@ class GoPoseNode(Node):
                     # continue_flag = True
                     break
 
-                twist_msg.angular.z = self.vel_angle
+                if diff_theta > (pi / 2) or diff_theta < -(pi / 2):
+                    twist_msg.angular.z = -self.vel_angle
+                else :
+                    twist_msg.angular.z = self.vel_angle
                 self.cmd_vel_pub.publish(twist_msg)
 
 
@@ -186,7 +189,7 @@ class GoPoseNode(Node):
 
             # Do something depending on the return code
             result = self.navigator.getResult()
-            if diff_distance <= 0.02:
+            if diff_distance <= 0.03:
                 self.navigator.cancelTask()
                 if i == astar_paths.length - 1:
                     print('Goal succeeded!')
