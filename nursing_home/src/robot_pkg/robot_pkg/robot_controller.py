@@ -14,6 +14,7 @@ from ament_index_python.packages import get_package_share_directory
 
 import os
 from math import sqrt, atan2, pi
+from tf_transformations import euler_from_quaternion
 
 bt_file = os.path.join(get_package_share_directory('robot_pkg'), 'behavior_tree', 'navigate_to_pose_and_pause_near_obstacle_proj.xml')
 
@@ -207,6 +208,15 @@ class GoPoseNode(Node):
     @staticmethod
     def calc_diff_distance(sx, gx, sy, gy):
         return sqrt(pow(gx - sx, 2) + pow(gy - sy, 2))      
+
+    @staticmethod
+    def calc_diff_theta(gx, gy):
+        global amcl
+
+        alpha = euler_from_quaternion([0, 0, amcl.pose.pose.orientation.z, amcl.pose.pose.orientation.w])[2]
+        beta = atan2((gy - amcl.pose.pose.position.y), (gx - amcl.pose.pose.position.x))
+
+        return beta - alpha
 
 def main():
     rclpy.init()
