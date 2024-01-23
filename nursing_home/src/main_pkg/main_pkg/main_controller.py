@@ -25,7 +25,7 @@ amcl_1 = PoseWithCovarianceStamped()
 amcl_2 = PoseWithCovarianceStamped()
 amcl_3 = PoseWithCovarianceStamped()
 
-TIMER_PERIOD = 0.5
+TIMER_PERIOD = 0.1
 
 class TaskRequestSubscriber(Node):
 
