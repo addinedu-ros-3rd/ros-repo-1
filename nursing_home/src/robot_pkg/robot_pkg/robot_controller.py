@@ -114,7 +114,7 @@ class GoPoseNode(Node):
                 feedback = self.navigator.getFeedback()
                 if feedback and j % 5 == 0:
                     if int(Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9) == 0:
-                        if waiting_cnt >= 5:
+                        if waiting_cnt >= 10:
                             break
                         waiting_cnt += 1
                     else:
