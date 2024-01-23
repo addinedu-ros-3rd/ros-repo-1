@@ -66,16 +66,22 @@ class HandSubscriber(Node):
             10
         )
         self.follow_publisher = self.create_publisher(String, '/follow', 10)
+        self.prev_hand = 'wait'
 
     def callback(self, msg):
         hand = String()
         if msg.data == 'start':
             self.ui.follow_label.setText("Follow 🟢")
             hand.data = 'follow'
+            self.prev_hand = hand.data
 
         elif msg.data == 'stop':
             self.ui.follow_label.setText("Wait 🔴")
             hand.data = 'wait'
+            self.prev_hand = hand.data
+        
+        else:
+            hand.data = self.prev_hand
 
         self.follow_publisher.publish(hand)
 
