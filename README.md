@@ -26,6 +26,9 @@
 ## 소프트웨어 구성도
 ![Screenshot from 2024-01-02 10-48-45](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/104709955/ac31cd37-73e2-4c35-841a-7fdff70312d0)
 
+## 다중 로봇 제어 시퀀스 다이어그램
+![시퀀스 다이어그램_단방향 drawio](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/143172717/b6a505d1-36b9-4f9c-bf54-dec90b7bceb5)
+
 ## Robot State Diagram
 ![Robot_state_diagram drawio](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/104709955/52f0cc3d-c6e4-4707-9b2a-f21612535576)
 
