@@ -30,7 +30,7 @@ CREATE TABLE `place` (
   `y` float NOT NULL,
   `z` float NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +39,7 @@ CREATE TABLE `place` (
 
 LOCK TABLES `place` WRITE;
 /*!40000 ALTER TABLE `place` DISABLE KEYS */;
-INSERT INTO `place` VALUES (1,'MEAL','배식대',0.130341,-0.77581,0),(2,'LAUNDRY','다용도실',1.68033,-0.665932,0),(3,'INITIAL_POSE_1','로봇1_시작점',0,-0.5,0),(4,'INITIAL_POSE_2','로봇2_시작점',0,0,0),(5,'INITIAL_POSE_3','로봇3_시작점',0,0.5,0),(6,'1-A','1-A',1.50853,-2.44005,0),(7,'1-B','1-B',1.57958,-1.83258,0),(8,'2-A','2-A',-0.00472827,-1.59278,0),(9,'2-B','2-B',-0.16069,-1.96202,0);
+INSERT INTO `place` VALUES (1,'MEAL','배식대',0.268526,-0.70297,0),(2,'LAUNDRY','다용도실',1.75687,-0.429889,0),(3,'INITIAL_POSE_1','로봇1_시작점',0,-0.5,0),(4,'INITIAL_POSE_2','로봇2_시작점',0,0,0),(5,'INITIAL_POSE_3','로봇3_시작점',0,0.5,0),(6,'1-A','1-A',1.87399,-2.25,0),(7,'1-B','1-B',1.81452,-1.54887,0),(8,'2-A','2-A',0.25,-1.60994,0),(9,'2-B','2-B',0.25,-2.18115,0),(10,'DESK','데스크',0.132795,0.85,0);
 /*!40000 ALTER TABLE `place` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -70,7 +70,7 @@ CREATE TABLE `robot` (
 
 LOCK TABLES `robot` WRITE;
 /*!40000 ALTER TABLE `robot` DISABLE KEYS */;
-INSERT INTO `robot` VALUES (1,100,99,2,1),(2,100,99,2,1),(3,90,99,2,1);
+INSERT INTO `robot` VALUES (1,100,93,2,1),(2,100,94,2,1),(3,90,97,2,1);
 /*!40000 ALTER TABLE `robot` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -122,7 +122,7 @@ CREATE TABLE `robot_work_mode` (
 
 LOCK TABLES `robot_work_mode` WRITE;
 /*!40000 ALTER TABLE `robot_work_mode` DISABLE KEYS */;
-INSERT INTO `robot_work_mode` VALUES (1,'NONE','업무중 아님'),(2,'AUTO','자율주행'),(3,'FOLLOW','따라다님'),(4,'TALK','대화중');
+INSERT INTO `robot_work_mode` VALUES (1,'NONE','업무중 아님'),(2,'AUTO','자율주행'),(3,'FOLLOW','팔로잉'),(4,'TALK','대화중');
 /*!40000 ALTER TABLE `robot_work_mode` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -149,17 +149,8 @@ CREATE TABLE `task` (
   KEY `fk_task_task_type` (`task_type_id`),
   CONSTRAINT `fk_task_robot` FOREIGN KEY (`robot_id`) REFERENCES `robot` (`id`),
   CONSTRAINT `fk_task_task_type` FOREIGN KEY (`task_type_id`) REFERENCES `task_type` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `task`
---
-
-LOCK TABLES `task` WRITE;
-/*!40000 ALTER TABLE `task` DISABLE KEYS */;
-/*!40000 ALTER TABLE `task` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `task_type`
@@ -186,6 +177,12 @@ LOCK TABLES `task_type` WRITE;
 INSERT INTO `task_type` VALUES (1,'MEAL','식사'),(2,'TISSUE','휴지'),(3,'LAUNDRY','빨래');
 /*!40000 ALTER TABLE `task_type` ENABLE KEYS */;
 UNLOCK TABLES;
+
+CREATE PROCEDURE IF NOT EXISTS `give_robot_task` (IN robotId INT, IN taskId INT)
+BEGIN
+	UPDATE task SET robot_id = robotId, started_at = now() WHERE id = taskId;
+	UPDATE robot SET robot_status_id = 3, robot_work_mode_id = 2 WHERE id = robotId;
+END;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -196,4 +193,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-01-16 10:13:33
+-- Dump completed on 2024-01-23 11:15:05
