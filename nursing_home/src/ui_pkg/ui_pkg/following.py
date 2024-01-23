@@ -24,6 +24,7 @@ import cv2
 import sys
 import os
 import yaml
+import time
 
 ui_file = os.path.join(get_package_share_directory('ui_pkg'), 'ui', 'following.ui')
 from_class = uic.loadUiType(ui_file)[0]
@@ -67,23 +68,50 @@ class HandSubscriber(Node):
         )
         self.follow_publisher = self.create_publisher(String, '/follow', 10)
         self.prev_hand = 'wait'
+        self.cur_data = None
+        self.start_time = None
+        self.last_times = 0
 
     def callback(self, msg):
         hand = String()
-        if msg.data == 'start':
-            self.ui.follow_label.setText("Follow 🟢")
-            hand.data = 'follow'
-            self.prev_hand = hand.data
-
-        elif msg.data == 'stop':
-            self.ui.follow_label.setText("Wait 🔴")
-            hand.data = 'wait'
-            self.prev_hand = hand.data
+        
+        if self.cur_data != msg.data:
+            self.cur_data = msg.data
+            self.start_time = time.time()
         
         else:
-            hand.data = self.prev_hand
+            if time.time() - self.start_time >= 1.5:
+                
+                self.hand = msg.data
+                
+                if msg.data == 'start':
+                    self.ui.follow_label.setText("Follow 🟢")
+                    hand.data = 'follow'
+                    self.prev_hand = hand.data
+                elif msg.data == 'stop':
+                    self.ui.follow_label.setText("Wait 🔴")
+                    hand.data = 'wait'
+                    self.prev_hand = hand.data
+                else:
+                    hand.data = self.prev_hand
+                
+                self.follow_publisher.publish(hand)
 
-        self.follow_publisher.publish(hand)
+
+        # if msg.data == 'start':
+        #     self.ui.follow_label.setText("Follow 🟢")
+        #     hand.data = 'follow'
+        #     self.prev_hand = hand.data
+
+        # elif msg.data == 'stop':
+        #     self.ui.follow_label.setText("Wait 🔴")
+        #     hand.data = 'wait'
+        #     self.prev_hand = hand.data
+        
+        # else:
+        #     hand.data = self.prev_hand
+
+        # self.follow_publisher.publish(hand)
 
 
 class WindowClass(QMainWindow, from_class):
