@@ -20,6 +20,7 @@ from cv_bridge import CvBridge
 from ament_index_python.packages import get_package_share_directory
 
 import numpy as np
+import signal
 import cv2
 import sys
 import os
@@ -80,7 +81,7 @@ class HandSubscriber(Node):
             self.start_time = time.time()
         
         else:
-            if time.time() - self.start_time >= 1.5:
+            if time.time() - self.start_time >= 2.5:
                 
                 self.hand = msg.data
                 
@@ -96,7 +97,6 @@ class HandSubscriber(Node):
                     hand.data = self.prev_hand
                 
                 self.follow_publisher.publish(hand)
-
 
         # if msg.data == 'start':
         #     self.ui.follow_label.setText("Follow 🟢")
@@ -120,32 +120,41 @@ class WindowClass(QMainWindow, from_class):
         self.setupUi(self)
         self.setWindowTitle('Following')
 
-        # self.btnFollow.clicked.connect(self.clickFollow)
-
-        self.isFollowOn = False
         self.follow_label.setText('Wait 🔴')
 
         self.follow_node = rp.create_node('following_mode')
         self.follow_publisher = self.follow_node.create_publisher(String, '/follow', 10)
 
-    # def clickFollow(self):
-    #     msg = String()
-    #     if self.isFollowOn == False:
-    #         self.btnFollow.setText('Follow off')
-    #         self.isFollowOn = True
-    #         self.follow_label.show()
-    #         self.follow_label.setText('Follow 🟢')
-    #         msg.data = 'follow'
+
+        # 사람 선택
+        self.isCaptureOn = False
+        self.capture_btn.setText('Capture Person')
+        self.capture_label.hide()
+        self.capture_btn.clicked.connect(self.clickCapture)
+
+        self.capture_node = rp.create_node('capture_mode')
+        self.capture_publisher = self.capture_node.create_publisher(String, '/capturing', 10)
+        
+
+    def clickCapture(self):
+        msg = String()
+        if self.isCaptureOn == False:
+            self.capture_btn.setText('Stop')
+            self.isCaptureOn = True
+            self.capture_label.show()
+            self.capture_label.setText('Capturing 🟢')
+
+            msg.data = 'capture_start'
             
-    #     else:
-    #         self.btnFollow.setText('Follow on')
-    #         self.isFollowOn = False
-    #         self.follow_label.show()
-    #         self.follow_label.setText('Wait 🔴')
-    #         msg.data = 'wait'
+        else:
+            self.capture_btn.setText('Capture Person')
+            self.isCaptureOn = False
+            self.capture_label.show()
+            self.capture_label.setText('Stop 🔴')
 
-    #     self.follow_publisher.publish(msg)
+            msg.data = 'capture_stop'
 
+        self.capture_publisher.publish(msg)
 
 def main():
     rp.init()
