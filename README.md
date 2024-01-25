@@ -128,6 +128,9 @@
   <img src="./images/path_planning_padding.png">
 </p>
 - Behavior Tree 개선 및 cmd_vel 조정을 통한 Timeout 상태 탈출
+<p align=center width="98%">
+  <img src="./images/BT.png">
+</p>
 
 ---
 
@@ -143,4 +146,21 @@
 
 ### 결과 요약
 
+- __Navigation
+  - A* Path Planning
+  - 장애물 Padding, 오차 보정을 통한 안전하고 정확한 주행
+  - Behavior Tree를 사용하여 동적/정적 장애물 회피 및 고착 상태 탈출
+
+
+- __다중 로봇 제어__
+  - 서로 다른 도메인ID 간 통신 가능하게 하여 하나의 맵에서 다수의 로봇을 제어
+  - 로봇 상태별 스케줄링
+
+- __딥러닝 요소__
+  - 딥러닝 기반의 영상 인식을 활용한 사람 추적 및 보행자 쓰러짐 인식 기능
+
 ### 회고
+- 보다 다양한 시나리오에서 장애물 회피 로직을 구현해보고 싶습니다.
+- 라이다와 엔코더 이외에도 여러 개의 센서를 사용하여 Localization에 활용해보고 싶습니다.
+- Jira, Confluence 등의 협업 툴을 사용해보는 기회가 되었습니다.
+- ROS2 topic을 통해 GUI로 다양한 기능을 보여줄 수 있어 재밌었습니다.
