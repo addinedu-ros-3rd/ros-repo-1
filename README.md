@@ -75,6 +75,16 @@
   <img src="./images/map.PNG">
 </p>
 
+### 데이터구조
+<p align=center width="98%">
+  <img src="./images/erd.png">
+</p>
+
+### GUI
+<p align=center width="98%">
+  <img src="./images/gui.png">
+</p>
+
 ---
 
 ## 다중 로봇 제어
