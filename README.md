@@ -26,6 +26,7 @@
 - [결론](#결론)
   - [결과 요약](#결과-요약)
   - [회고](#회고)
+  - [발표자료](#발표자료)
 
 ---
 
@@ -145,7 +146,6 @@
 ## 결론
 
 ### 결과 요약
-
 - __Navigation
   - A* Path Planning
   - 장애물 Padding, 오차 보정을 통한 안전하고 정확한 주행
@@ -164,3 +164,6 @@
 - 라이다와 엔코더 이외에도 여러 개의 센서를 사용하여 Localization에 활용해보고 싶습니다.
 - Jira, Confluence 등의 협업 툴을 사용해보는 기회가 되었습니다.
 - ROS2 topic을 통해 GUI로 다양한 기능을 보여줄 수 있어 재밌었습니다.
+
+### 발표자료
+https://docs.google.com/presentation/d/1JA80CWg-Doe3NlXZKzBihne2yhNvz5CSX7nk5qTw1c4/edit?usp=sharing
