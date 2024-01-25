@@ -11,6 +11,8 @@
   - [시스템 구성](#시스템-구성)
   - [기능 리스트](#기능-리스트)
   - [Map](#map)
+  - [데이터구조](#데이터구조)
+  - [GUI](#GUI)
 - [다중 로봇 제어](#다중-로봇-제어)
   - [Multi-Robot Control](#multi-robot-control)
   - [Task Planning](#task-planning)
