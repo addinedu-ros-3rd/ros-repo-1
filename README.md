@@ -1,94 +1,136 @@
 # 1조 쉬러왔서영
+
+---
+
 ## Index
-- 프로젝트 소개
-  - 프로젝트 개요
-  - 개발 환경 & 기술 키워드
-  - 시스템 구성 & 시나리오 & Map
-- Navigation
-  - A* Path Planning
-  - 이상 상황 Management
-- 다중 로봇 제어
-  - Multi-Robot Task Planning
-  - GUI 관제
-- 딥러닝 요소
-  - Following: 사람 추적 기능
-  - 안전 기능: 쓰러진 보행자 인식
-- 결론
-  - 결과 요약
-  - 팀원 역할
-  - 회고
- 
-  
+- [프로젝트 소개](#프로젝트-소개)
+  - [프로젝트 기간](#프로젝트-기간)
+  - [기술 스택](#기술-스택)
+  - [팀원 역할](#팀원-역할)
+- [프로젝트 설계](#프로젝트-설계)
+  - [시스템 구성](#시스템-구성)
+  - [기능 리스트](#기능-리스트)
+  - [Map](#map)
+- [다중 로봇 제어](#다중-로봇-제어)
+  - [Multi-Robot Control](#multi-robot-control)
+  - [Task Planning](#task-planning)
+    - [작업 요청 시나리오](#작업-요청-시나리오)
+    - [작업 스케줄링 시나리오](#작업-스케줄링-시나리오)
+    - [작업 수행 시나리오](#작업-수행-시나리오)
+- [Navigation](#navigation)
+  - [A* Path Planning](#a-path-planning)
+  - [이슈 처리](#이슈-처리)
+- [딥러닝 요소](#딥러닝-요소)
+  - [Following: 사람 추적 기능](#following-사람-추적-기능)
+  - [안전 기능: 쓰러진 보행자 인식](#안전-기능-쓰러진-보행자-인식)
+- [결론](#결론)
+  - [결과 요약](#결과-요약)
+  - [회고](#회고)
 
-## 프로젝트 목적
-병원에서 의료진의 수고를 덜어주는 다중 자율 주행 로봇
+---
 
-## 소프트웨어 구성도
-![Screenshot from 2024-01-02 10-48-45](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/104709955/ac31cd37-73e2-4c35-841a-7fdff70312d0)
+## 프로젝트 소개
+요양원 업무 보조를 위한 <b>다중 주행 로봇 제어 시스템</b>
+<p align=center width="98%">
+  <img src="./images/play.gif">
+</p>
 
-## 다중 로봇 제어 시퀀스 다이어그램
-![시퀀스 다이어그램_단방향 drawio](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/143172717/b6a505d1-36b9-4f9c-bf54-dec90b7bceb5)
+### 프로젝트 기간
+2023.12.26 ~ 2024.01.25
 
-## Robot State Diagram
-![Robot_state_diagram drawio](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/104709955/52f0cc3d-c6e4-4707-9b2a-f21612535576)
+### 기술 스택
+|   |   |
+|---|---|
+|개발환경|![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=Ubuntu&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white) ![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white) ![RDS](https://img.shields.io/badge/AWS%20RDS-527FFF?style=for-the-badge&logo=Amazon%20RDS&logoColor=white)||
+|기술|![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=PyTorch&logoColor=white) ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=OpenCV&logoColor=white) ![ROS2](https://img.shields.io/badge/ROS2-22314E?style=for-the-badge&logo=ROS&logoColor=white) ![Mysql](https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white) ![Qt](https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=Qt&logoColor=white)|
+|커뮤니케이션|![Jira](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white) ![Confluence](https://img.shields.io/badge/Confluence-172B4D?style=for-the-badge&logo=Confluence&logoColor=white) ![Slack](https://img.shields.io/badge/slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)|
 
-## Use Case Diagram
-![Use_case_diagram drawio](https://github.com/addinedu-ros-3rd/ros-repo-1/assets/104709955/f9e71c48-901e-4be6-8309-7f8c94f56d9a)
+### 팀원 역할
 
-### 세부 시나리오
-한 층으로 되어있는 병원에서 총 3대(이상)의 로봇 대기
-### 기능 리스트
-- 주행: 
-  - 경로를 생성하며 자율주행
-  - 정적/동적 장애물 회피 가능
-  - 안내: 병실 또는 진료실로 안내
-  - 목적지까지 자율주행하며 안내
-  - 안내 대상(사람)을 인식, 잘 따라오고 있는지 확인
-- 배송: 
-  - 바구니 탑재
-    - 식사 또는 물품 전달
-- 관제:
-    - 여러 태스크가 동시에 발생했을 때 우선순위/비용을 계산하여 처리
-    - 다중 로봇 관제
-
-### 업무 부여 프로세스
-
-- Task 우선순위
-1) 의료진 배송요청 - 도착 후 10초 대기
-2) 길안내 - 도착 후 10초 대기
-3) 식사 서빙 - 도착 후 30초 대기
-4) 복귀
-
-- 추가 고려사항
-
-1) 해당 태스크를 수행하기에 더 적합한 로봇이 있는지
-    - 놀고 있음 / 놀고 있지 않지만 곧(30초 이내로) 끝남
-    - 더 가까움
-2) 더 멀리 있지만 놀고 있는 로봇 vs 더 가까이 있고 일을 하고 있는 로봇
-    - 의료진 배송요청 : 가장 가까이 있는 로봇이 (의료진 배송요청을 이미 수행중이 아닐 때) 수행
-    - 길안내 / 식사 서빙: 놀고 있는 로봇 우선
-3) 모든 로봇이 일을 하고 있다면?
-    - 수행을 마친 위치가 가까운 로봇에게, 우선순위가 높은 일부터 큐에 쌓음
-    - 길안내 / 식사 서빙도 태스크 대기 시간이 5분은 넘어가지 않아야 함
-
-태스크는 우선순위 큐로 관리
-
-- pseudo code
-```
-if 예정 시각 5분 이내의 태스크:
-  예정 태스크 할당
-elif 5분 지난 태스크 있을 경우:
-  5분 지난 거 할당
-else:
-  일반 우선순위 큐
-```
-## 팀원 소개 및 역할
 |구분|이름|역할|
 |---|---|---|
-|팀장|조태상||
-|팀원|강한얼||
-|팀원|오윤||
-|팀원|문서영||
-|팀원|조홍기||
-|팀원|강소희||
+|팀장|조태상|Map 구축, SLAM, Camera Calibration, Aruco Marker Detection|
+|팀원|강소희|GUI 설계 및 디자인, Map 구축|
+|팀원|강한얼|딥러닝 활용 Following mode, 보행자 쓰러짐 인식 기능 개발|
+|팀원|문서영|Map 구축, SLAM, 딥러닝 활용 Following mode|
+|팀원|오윤|Multi Robot Control, Task Planning, DB Query/SP 작성, GUI 경로 표시|
+|팀원|조홍기|A* Path Planning, 로봇 주행, Multi Robot Spawn 시도|
 
+---
+
+## 프로젝트 설계
+
+### 시스템 구성
+<p align=center width="98%">
+  <img src="./images/system_architecture.png">
+</p>
+
+### 기능 리스트
+<p align=center width="98%">
+  <img src="./images/functions.png">
+</p>
+
+### Map
+<p align=center width="98%">
+  <img src="./images/map.PNG">
+</p>
+
+---
+
+## 다중 로봇 제어
+
+### Multi-Robot Control
+<p align=center width="98%">
+  <img src="./images/multi_robot_control.PNG">
+</p>
+
+### Task Planning
+#### 작업 요청 시나리오
+<p align=center width="98%">
+  <img src="./images/task_req.png">
+</p>
+
+#### 작업 스케줄링 시나리오
+<p align=center width="98%">
+  <img src="./images/task_skd.png">
+</p>
+
+#### 작업 수행 시나리오
+<p align=center width="98%">
+  <img src="./images/task_run.png">
+</p>
+
+---
+
+## Navigation
+
+### A* Path Planning
+
+- Sequence Diagram
+<p align=center width="98%">
+  <img src="./images/path_planning.png">
+</p>
+
+### 이슈 처리
+
+- 안전 주행을 위한 장애물 Padding 처리
+<p align=center width="98%">
+  <img src="./images/path_planning_padding.png">
+</p>
+- Behavior Tree 개선 및 cmd_vel 조정을 통한 Timeout 상태 탈출
+
+---
+
+## 딥러닝 요소
+
+### Following: 사람 추적 기능
+
+### 안전 기능: 쓰러진 보행자 인식
+
+---
+
+## 결론
+
+### 결과 요약
+
+### 회고

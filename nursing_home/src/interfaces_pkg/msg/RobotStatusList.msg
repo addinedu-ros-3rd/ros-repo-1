@@ -1,0 +1,3 @@
+interfaces_pkg/RobotStatus robot1
+interfaces_pkg/RobotStatus robot2
+interfaces_pkg/RobotStatus robot3
