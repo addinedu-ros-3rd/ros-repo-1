@@ -50,7 +50,7 @@
 |구분|이름|역할|
 |---|---|---|
 |팀장|조태상|Map 구축, SLAM, Camera Calibration, Aruco Marker Detection|
-|팀원|강소희|GUI 설계 및 디자인|
+|팀원|강소희|GUI 설계 및 디자인, Map 구축|
 |팀원|강한얼|딥러닝 활용 Following mode, 보행자 쓰러짐 인식 기능 개발|
 |팀원|문서영|Map 구축, SLAM, 딥러닝 활용 Following mode|
 |팀원|오윤|Multi Robot Control, Task Planning, DB Query/SP 작성, GUI 경로 표시|
