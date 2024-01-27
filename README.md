@@ -26,10 +26,15 @@
   - [Following: 사람 추적 기능](#following-사람-추적-기능)
   - [안전 기능: 쓰러진 보행자 인식](#안전-기능-쓰러진-보행자-인식)
 - [결론](#결론)
-  - [시연영상](#시연영상)
+  - [시연 영상](#시연-영상)
   - [결과 요약](#결과-요약)
   - [회고](#회고)
   - [발표자료](#발표자료)
+- [실행 방법](#실행-방법)
+  - [공통](#공통)
+  - [다중 로봇](#다중-로봇)
+  - [Following](#Following)
+  - [안전 기능](#안전-기능)
 
 ---
 
@@ -79,7 +84,7 @@
   <img src="./images/map.PNG">
 </p>
 
-### 데이터구조
+### 데이터 구조
 <p align=center width="98%">
   <img src="./images/erd.png">
 </p>
@@ -177,3 +182,139 @@
 
 ### 발표자료
 https://docs.google.com/presentation/d/1JA80CWg-Doe3NlXZKzBihne2yhNvz5CSX7nk5qTw1c4/edit?usp=sharing
+
+---
+
+## 실행 방법
+
+### 공통
+- ROS2의 humble 버전을 설치하여 사용했습니다.
+- 핑크랩의 미니봇 하드웨어와 소스코드(https://github.com/PinkWink/pinklab_minibot_robot)를 사용했습니다.
+  - minibot_bringup/scripts 파일로 udev를 설정했습니다.
+- 모터 컨트롤을 위해 핑크랩의 아두이노 코드(https://github.com/PinkWink/pinklab_minibot_robot_firmware)를 사용했습니다.
+- LiDAR 사용을 위해 안병규님이 수정하신 driver(https://github.com/byeongkyu/ydlidar_ros2_driver)를 사용했습니다.
+- 미니봇을 구동하기 위해 Ubuntu 22.04를 설치한 라즈베리파이와 PC를 사용했습니다.
+- 사용되는 모든 PC/라즈베리파이는 ROS2 통신을 위해 동일한 네트워크에 접속했습니다.
+- 프로젝트를 클론한 후, nursing_home 디렉토리에서 빌드해주세요.
+```
+git clone https://github.com/addinedu-ros-3rd/ros-repo-1.git
+cd ros-repo-1/nursing_home
+colcon build
+source ./install/local_setup.bash
+```
+
+### 다중 로봇
+1) DB 접속<br>
+- nursing_home/src/main_pkg/utils 경로에 config.ini 파일 생성
+```
+[dev]
+host = DB Host
+port = DB port
+user = DB user
+password = DB password
+database = DB database name
+```
+
+- 해당 DB에 Table/Procedure 가져오기
+```
+source create_and_init.sql
+```
+
+2) ROS_DOMAIN_ID 및 ROS2 환경 접속 설정<br>
+프로젝트 루트에 있는 bridge_config.yaml 설정을 그대로 사용한다면<br>
+다음 내용을 ~/.bashrc 파일에 추가한 다음 ```source ~/.bashrc``` 하면 됩니다.<br>
+
+- 관제 PC
+```
+export ROS_DOMAIN_ID = 91
+source /opt/ros/humble/setup.bash
+source ~/nursing_home/install/local_setup.bash
+```
+
+- 로봇1 라즈베리파이
+```
+export ROS_DOMAIN_ID = 93
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+```
+
+- 로봇1 PC
+```
+export ROS_DOMAIN_ID = 93
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+source ~/nursing_home/install/local_setup.bash
+```
+
+- 로봇2 라즈베리파이
+```
+export ROS_DOMAIN_ID = 94
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+```
+
+- 로봇2 PC
+```
+export ROS_DOMAIN_ID = 94
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+source ~/nursing_home/install/local_setup.bash
+```
+
+- 로봇3 라즈베리파이
+```
+export ROS_DOMAIN_ID = 97
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+```
+
+- 로봇3 PC
+```
+export ROS_DOMAIN_ID = 97
+source /opt/ros/humble/setup.bash
+source ~/pinkbot/install/local_setup.bash
+source ~/nursing_home/install/local_setup.bash
+```
+
+3) 라즈베리파이: 로봇 실행 + 카메라 실행
+- 터미널 1
+```
+ros2 launch minibot_bringup bringup_robot.launch.py
+```
+
+- 터미널 2
+```
+sudo chmod 777 /dev/video0
+ros2 run v4l2_camera v4l2_camera_node
+```
+
+4) 로봇PC: 주행 실행(yaml파일 경로: nursing_home/src/main_pkg/map)
+- 터미널 1
+```
+ros2 launch minibot_navigation2 bringup_launch.py map:=home.yaml
+```
+
+- 터미널 2
+```
+ros2 run robot_pkg robot_controller
+```
+
+5) 관제PC: GUI/메인컨트롤러 실행
+- 터미널 1
+```
+ros2 run main_pkg main_controller
+```
+
+- 터미널 2
+```
+ros2 run ui_pkg monitoring
+```
+
+- 터미널 3
+```
+ros2 run domain_bridge domain_bridge bridge_config.yaml
+```
+
+### Following
+
+### 안전 기능
