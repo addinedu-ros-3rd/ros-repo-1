@@ -11,7 +11,7 @@
   - [시스템 구성](#시스템-구성)
   - [기능 리스트](#기능-리스트)
   - [Map](#map)
-  - [데이터구조](#데이터구조)
+  - [데이터 구조](#데이터-구조)
   - [GUI](#GUI)
 - [다중 로봇 제어](#다중-로봇-제어)
   - [Multi-Robot Control](#multi-robot-control)
@@ -26,6 +26,7 @@
   - [Following: 사람 추적 기능](#following-사람-추적-기능)
   - [안전 기능: 쓰러진 보행자 인식](#안전-기능-쓰러진-보행자-인식)
 - [결론](#결론)
+  - [시연영상](#시연영상)
   - [결과 요약](#결과-요약)
   - [회고](#회고)
   - [발표자료](#발표자료)
@@ -146,6 +147,13 @@
 ---
 
 ## 결론
+
+### 시연 영상
+<p align=center>
+  <a href="https://youtu.be/rqWVjeEV688?feature=shared">
+    <img src="https://i.ytimg.com/vi/rqWVjeEV688/maxresdefault.jpg" width="80%">
+  </a>
+</p>
 
 ### 결과 요약
 - __Navigation
