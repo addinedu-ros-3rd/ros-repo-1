@@ -204,7 +204,7 @@ source ./install/local_setup.bash
 ```
 
 ### 다중 로봇
-1) DB 접속<br>
+#### 1) DB 접속<br>
 - nursing_home/src/main_pkg/utils 경로에 config.ini 파일 생성
 ```
 [dev]
@@ -220,7 +220,7 @@ database = DB database name
 source create_and_init.sql
 ```
 
-2) ROS_DOMAIN_ID 및 ROS2 환경 접속 설정<br>
+#### 2) ROS_DOMAIN_ID 및 ROS2 환경 접속 설정<br>
 프로젝트 루트에 있는 bridge_config.yaml 설정을 그대로 사용한다면<br>
 다음 내용을 ~/.bashrc 파일에 추가한 다음 ```source ~/.bashrc``` 하면 됩니다.<br>
 
@@ -276,7 +276,7 @@ source ~/pinkbot/install/local_setup.bash
 source ~/nursing_home/install/local_setup.bash
 ```
 
-3) 라즈베리파이: 로봇 실행 + 카메라 실행
+#### 3) 라즈베리파이: 로봇 실행 + 카메라 실행
 - 터미널 1
 ```
 ros2 launch minibot_bringup bringup_robot.launch.py
@@ -288,7 +288,7 @@ sudo chmod 777 /dev/video0
 ros2 run v4l2_camera v4l2_camera_node
 ```
 
-4) 로봇PC: 주행 실행(yaml파일 경로: nursing_home/src/main_pkg/map)
+#### 4) 로봇PC: 주행 실행(yaml파일 경로: nursing_home/src/main_pkg/map)
 - 터미널 1
 ```
 ros2 launch minibot_navigation2 bringup_launch.py map:=home.yaml
@@ -299,7 +299,7 @@ ros2 launch minibot_navigation2 bringup_launch.py map:=home.yaml
 ros2 run robot_pkg robot_controller
 ```
 
-5) 관제PC: GUI/메인컨트롤러 실행
+#### 5) 관제PC: GUI/메인컨트롤러 실행
 - 터미널 1
 ```
 ros2 run main_pkg main_controller
