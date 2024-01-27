@@ -189,10 +189,10 @@ https://docs.google.com/presentation/d/1JA80CWg-Doe3NlXZKzBihne2yhNvz5CSX7nk5qTw
 
 ### 공통
 - ROS2의 humble 버전을 설치하여 사용했습니다.
-- 핑크랩의 미니봇 하드웨어와 소스코드(https://github.com/PinkWink/pinklab_minibot_robot)를 사용했습니다.
+- 핑크랩의 미니봇 하드웨어와 소스코드(https://github.com/PinkWink/pinklab_minibot_robot) 를 사용했습니다.
   - minibot_bringup/scripts 파일로 udev를 설정했습니다.
-- 모터 컨트롤을 위해 핑크랩의 아두이노 코드(https://github.com/PinkWink/pinklab_minibot_robot_firmware)를 사용했습니다.
-- LiDAR 사용을 위해 안병규님이 수정하신 driver(https://github.com/byeongkyu/ydlidar_ros2_driver)를 사용했습니다.
+- 모터 컨트롤을 위해 핑크랩의 아두이노 코드(https://github.com/PinkWink/pinklab_minibot_robot_firmware) 를 사용했습니다.
+- LiDAR 사용을 위해 안병규님이 수정하신 driver(https://github.com/byeongkyu/ydlidar_ros2_driver) 를 사용했습니다.
 - 미니봇을 구동하기 위해 Ubuntu 22.04를 설치한 라즈베리파이와 PC를 사용했습니다.
 - 사용되는 모든 PC/라즈베리파이는 ROS2 통신을 위해 동일한 네트워크에 접속했습니다.
 - 프로젝트를 클론한 후, nursing_home 디렉토리에서 빌드해주세요.
