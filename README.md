@@ -310,8 +310,9 @@ ros2 run main_pkg main_controller
 ros2 run ui_pkg monitoring
 ```
 
-- 터미널 3
+- 터미널 3 (domain bridge 설치 관련 참고: https://github.com/ros2/domain_bridge)
 ```
+sudo apt install ros-humble-domain-bridge
 ros2 run domain_bridge domain_bridge bridge_config.yaml
 ```
 
