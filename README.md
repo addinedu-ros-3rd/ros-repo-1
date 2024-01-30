@@ -23,7 +23,7 @@
   - [A* Path Planning](#a-path-planning)
   - [이슈 처리](#이슈-처리)
 - [딥러닝 요소](#딥러닝-요소)
-  - [Following: 사람 추적 기능](#following-사람-추적-기능)
+  - [Human Following Robot: 사람 추적 기능](#-Human-Following-Robot)
   - [안전 기능: 쓰러진 보행자 인식](#안전-기능-쓰러진-보행자-인식)
 - [결론](#결론)
   - [시연 영상](#시연-영상)
@@ -145,9 +145,51 @@
 
 ## 딥러닝 요소
 
-### Following: 사람 추적 기능
+### Human Following Robot
 
-### 안전 기능: 쓰러진 보행자 인식
+|Components|Model|Training|
+|------|------|------|
+|Object detection model|YOLOv8n|From scratch|
+|CNN model|MobileNet-V3|From scratch|
+
+#### 특정 사람 지정하여 following
+
+<p align=center width="100%">
+  <img src="./images/sample_save.gif" height="250" width="35%" style="float:left">
+  <img src="./images/specific-following-resize.gif" height="250" width="30%" style="float:left">
+  <img src="./images/specific-following-robot-view.gif" height="250" width="30%" style="float:left">
+</p>
+
+- 지정한 사람의 이미지를 캡쳐하고, pre-trained 모델의 feature extractore의 output을 anchor로 사용
+- 탐지된 객체의 feature vector를 anchor와 cosine 유사도를 비교
+- 일정 수준 이상의 가장 유사도가 높은 객체를 지정한 대상으로 판단
+
+<p align=center>
+  <img src="./images/anchor.png" width="70%">
+</p>
+
+#### 손 동작을 사용한 following 모드 변경
+
+- "Open  palm" 동작으로 following 모드를 끔
+- "Finger snap" 동작으로 following 모드를 킴
+
+<p align=center width="100%">
+  <img src="./images/mode-change.png" height="300" width="35%" style="float:left">
+  <img src="./images/following-mode-change.gif" height="300" width="35%" style="float:left">
+</p>
+
+### 안전 기능
+
+#### CCTV 영상 속 보행자 쓰러짐을 감지하여 GUI에 긴급상황을 표시함
+
+|Components|Model|Training|
+|------|------|------|
+|Human pose estimation model|Mediapipe|Pre-trained|
+|Action recognition model|LSTM|From scratch|
+
+<p align=center>
+  <img src="./images/ActionRecognition.gif" width="70%">
+</p>
 
 ---
 
@@ -317,5 +359,7 @@ ros2 run domain_bridge domain_bridge bridge_config.yaml
 ```
 
 ### Following
+
+#### 특정 사람 지정하여 following
 
 ### 안전 기능
