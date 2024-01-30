@@ -23,8 +23,8 @@
   - [A* Path Planning](#a-path-planning)
   - [이슈 처리](#이슈-처리)
 - [딥러닝 요소](#딥러닝-요소)
-  - [Human Following Robot: 사람 추적 기능](#-Human-Following-Robot)
-  - [안전 기능: 쓰러진 보행자 인식](#안전-기능-쓰러진-보행자-인식)
+  - [Human Following Robot](#human-following-robot)
+  - [쓰러진 보행자 인식](#보행자-쓰러짐-인식)
 - [결론](#결론)
   - [시연 영상](#시연-영상)
   - [결과 요약](#결과-요약)
@@ -33,9 +33,8 @@
 - [실행 방법](#실행-방법)
   - [공통](#공통)
   - [다중 로봇](#다중-로봇)
-  - [Following](#Following)
-  - [안전 기능](#안전-기능)
-
+  - [Human Following](#human-following)
+  - [보행자 쓰러짐 인식 기능](#보행자-쓰러짐-인식-기능)
 ---
 
 ## 프로젝트 소개
@@ -178,7 +177,7 @@
   <img src="./images/following-mode-change.gif" height="300" width="35%" style="float:left">
 </p>
 
-### 안전 기능
+### 보행자 쓰러짐 인식
 
 #### CCTV 영상 속 보행자 쓰러짐을 감지하여 GUI에 긴급상황을 표시함
 
@@ -358,8 +357,34 @@ sudo apt install ros-humble-domain-bridge
 ros2 run domain_bridge domain_bridge bridge_config.yaml
 ```
 
-### Following
+### Human Following
 
-#### 특정 사람 지정하여 following
+- Robot
+```
+# 터미널1: Start robot
+ros2 launch minibot_bringup bringup_robot.launch.py
 
-### 안전 기능
+# 터미널2: Start robot camera
+ros2 launch minibot_bringup camera.launch.py
+```
+
+- PC
+```
+# 터미널1 : Multi-person tracker
+ros2 run follow_dl_pkg multi_person_tracker
+
+# 터미널2 : Hand gesture recognizer
+ros2 run follow_dl_pkg hand_recognizer
+
+# 터미널3 : Image capture
+ros2 run follow_dl_pkg img_saver
+```
+
+### 보행자 쓰러짐 인식 기능
+```
+# 터미널1: Action recognition
+ros2 run dl_pkg action_predicto
+
+# 터미널2 : GUI
+ros2 run ui_pkg monitoring
+```
