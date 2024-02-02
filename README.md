@@ -61,7 +61,7 @@
 |팀원|강소희|GUI 설계 및 디자인, Map 구축|
 |팀원|강한얼|딥러닝 활용 Following mode, 보행자 쓰러짐 인식 기능 개발|
 |팀원|문서영|Map 구축, SLAM, 딥러닝 활용 Following mode|
-|팀원|오윤|Multi Robot Control, Task Planning, DB Query/SP 작성, GUI 경로 표시|
+|팀원|오윤|Multi Robot Control, Task Planning, DB Query/Procedure 작성, GUI 경로 표시, BT 수정|
 |팀원|조홍기|A* Path Planning, 로봇 주행, Multi Robot Spawn 시도|
 
 ---
